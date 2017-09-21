@@ -1,0 +1,31 @@
+<html>
+<body>
+<h1 id="site_name">岡竜之介の大喜利道場</h1>
+
+
+<p id="odai">
+    <h2>お題：</h2>
+    <h2>こんな浦島太郎は嫌だ</h2>
+    <p id="answer_form">
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+        <form action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
+        {% csrf_token %}
+        <input type="text" name="answer_text" placeholder="例：表島次郎だ" required>
+        <input type="submit" value="回答を投稿する">
+        </form>
+    </p>
+    {% if answer_list %}
+        <ul>
+        {% for answer in answer_list %}
+            <li>{{ answer.answer_text }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>回答がありません。</p>
+    {% endif %}
+</p>
+
+
+</body>
+</html>
