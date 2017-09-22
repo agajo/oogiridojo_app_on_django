@@ -10,15 +10,22 @@
         {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
         <form action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
-        {% csrf_token %}
-        <input type="text" name="answer_text" placeholder="例：表島次郎だ" required>
-        <input type="submit" value="回答を投稿する">
+            {% csrf_token %}
+            <input type="text" name="answer_text" placeholder="例：表島次郎だ" required>
+            <input type="submit" value="回答を投稿する">
         </form>
     </p>
     {% if answer_list %}
         <ul>
         {% for answer in answer_list %}
-            <li>{{ answer.answer_text }}</li>
+            <li>
+                {{ answer.answer_text }}
+                <strong>--{{ answer.free_vote_score }}</strong>
+                <form action = "{% url 'oogiridojo:index' %}" method="post">
+                    {% csrf_token %}
+                    <button name="free_vote_button" value="{{ answer.id }}">良い</button>
+                </form>
+            </li>
         {% endfor %}
         </ul>
     {% else %}

@@ -7,6 +7,10 @@ from django.urls import reverse
 from .models import Answer
 
 def index(request):
+    if(request.POST['free_vote_button']):
+        answer = Answer.objects.get(pk=request.POST['free_vote_button'])
+        answer.free_vote_score += 1
+        answer.save()
     answer_list = Answer.objects.all()
     context = {'answer_list': answer_list}
     return render(request, 'oogiridojo/index.html', context)
