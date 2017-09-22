@@ -16,18 +16,18 @@
         </form>
     </p>
     {% if answer_list %}
-        <ul>
-        {% for answer in answer_list %}
-            <li>
-                <form action = "{% url 'oogiridojo:index' %}" method="post">
+        <form action = "{% url 'oogiridojo:index' %}" method="post">
+            <ul>
+            {% for answer in answer_list %}
+                <li>
                     {{ answer.answer_text }}
                     <strong>--{{ answer.free_vote_score }}</strong>
                     {% csrf_token %}
                     <button name="free_vote_button" value="{{ answer.id }}">良い</button>
-                </form>
-            </li>
-        {% endfor %}
-        </ul>
+                </li>
+            {% endfor %}
+            </ul>
+        </form>
     {% else %}
         <p>回答がありません。</p>
     {% endif %}
