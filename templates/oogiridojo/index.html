@@ -19,9 +19,9 @@
         <ul>
         {% for answer in answer_list %}
             <li>
-                {{ answer.answer_text }}
-                <strong>--{{ answer.free_vote_score }}</strong>
                 <form action = "{% url 'oogiridojo:index' %}" method="post">
+                    {{ answer.answer_text }}
+                    <strong>--{{ answer.free_vote_score }}</strong>
                     {% csrf_token %}
                     <button name="free_vote_button" value="{{ answer.id }}">良い</button>
                 </form>
