@@ -18,3 +18,13 @@ class IndexViewAnswersTests(TestCase):
         create_answer(answer_text="ほげほげ")
         response = self.client.get(reverse('oogiridojo:index'))
         self.assertContains(response,"ほげほげ")
+
+    def test_an_answer_with_free_vote_score(self):
+        Answer.objects.create(answer_text="ふが", free_vote_score=1)
+        response = self.client.get(reverse('oogiridojo:index'))
+        self.assertContains(response,"<strong>--1</strong>")
+
+    def test_free_vote_score_increment(self):
+        answer = Answer.objects.create(answer_text="ふが", free_vote_score=1)
+        response = self.client.post(reverse("oogiridojo:index"), {'free_vote_button':answer.id})
+        self.assertContains(response,"<strong>--2</strong>")

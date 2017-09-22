@@ -7,7 +7,7 @@ from django.urls import reverse
 from .models import Answer
 
 def index(request):
-    if(request.POST['free_vote_button']):
+    if('free_vote_button' in request.POST):
         answer = Answer.objects.get(pk=request.POST['free_vote_button'])
         answer.free_vote_score += 1
         answer.save()
