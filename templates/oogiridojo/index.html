@@ -1,37 +1,42 @@
 <html>
+<head>
+    <title>岡竜之介の大喜利道場</title>
+</head>
 <body>
 <h1 id="site_name">岡竜之介の大喜利道場</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-
-<p id="odai">
-    <h2>お題：</h2>
-    <h2>こんな浦島太郎は嫌だ</h2>
-    <p id="answer_form">
-        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-        <form action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
-            {% csrf_token %}
-            <input type="text" name="answer_text" placeholder="例：表島次郎だ" required>
-            <input type="submit" value="回答を投稿する">
-        </form>
-    </p>
-    {% if answer_list %}
-        <form action = "{% url 'oogiridojo:index' %}" method="post">
-            <ul>
-            {% for answer in answer_list %}
-                <li>
-                    {{ answer.answer_text }}
-                    <strong>--{{ answer.free_vote_score }}</strong>
+{% if odai_list %}
+    {% for odai in odai_list %}
+        <section id="odai{{ forloop.counter }}">
+            <h2>お題：{{ odai.odai_text }}</h2>
+                <form id="answer_form" action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
                     {% csrf_token %}
-                    <button name="free_vote_button" value="{{ answer.id }}">良い</button>
-                </li>
-            {% endfor %}
-            </ul>
-        </form>
-    {% else %}
-        <p>回答がありません。</p>
-    {% endif %}
-</p>
+                    <input type="text" name="answer_text" placeholder="例：{{ odai.example_text }}" required>
+                    <input type="submit" value="回答を投稿する">
+                    <input type="hidden" name="odai_id" value = {{ odai.id }}>
+                </form>
+            <form action = "{% url 'oogiridojo:index' %}" method="post">
+                {% if odai.answer_set.all %}
+                        <ul>
+                        {% for answer in odai.answer_set.all %}
+                            <li>
+                                {{ answer.answer_text }}
+                                <strong>--{{ answer.free_vote_score }}</strong>
+                                {% csrf_token %}
+                                <button name="free_vote_button" value="{{ answer.id }}">良い</button>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                {% else %}
+                    <p>回答がありません。</p>
+                {% endif %}
+            </form>
+        </section>
+    {% endfor %}
+{% else %}
+    <p>お題がありません。</p>
+{% endif %}
 
 
 </body>
