@@ -19,7 +19,7 @@
             <form action = "{% url 'oogiridojo:index' %}" method="post">
                 {% if odai.answer_set.all %}
                         <ul>
-                        {% for answer in odai.answer_set.all %}
+                        {% for answer in odai.answer_list %}
                             <li>
                                 {{ answer.answer_text }}
                                 <strong>--{{ answer.free_vote_score }}</strong>

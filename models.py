@@ -9,6 +9,8 @@ class Odai(models.Model):
     creation_date = models.DateTimeField('date created', default=timezone.now)
     def __str__(self):
         return self.odai_text
+    def answer_list(self):
+        return self.answer_set.all().order_by('id')
 
 class Answer(models.Model):
     odai = models.ForeignKey(Odai, on_delete=models.CASCADE)

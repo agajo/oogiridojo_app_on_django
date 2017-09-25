@@ -4,6 +4,18 @@ from django.urls import reverse
 
 # Create your tests here.
 
+class OdaiModelTests(TestCase):
+    def test_answer_list_order(self):
+        odai = Odai.objects.create(odai_text="odada")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1)
+        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1)
+        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1)
+        ans2.answer_text="ans2_2"
+        #ポスグレだと、この操作をすることで、取り出される順番が変わることがある。それが発生していないかチェックしている。
+        ans2.save()
+        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans1>', '<Answer: ans2_2>','<Answer: ans3>'])
+
+
 class IndexViewAnswersTests(TestCase):
     def test_no_answers(self):
         Odai.objects.create(odai_text="odaoda")
