@@ -6,7 +6,7 @@ from django.urls import reverse
 
 class OdaiModelTests(TestCase):
     def test_answer_list_order(self):
-        odai = Odai.objects.create(odai_text="odada")
+        odai = Odai.objects.create(id = 1, odai_text="odada")
         ans1 = Answer.objects.create(answer_text="ans1", odai_id=1)
         ans2 = Answer.objects.create(answer_text="ans2", odai_id=1)
         ans3 = Answer.objects.create(answer_text="ans3", odai_id=1)
