@@ -6,7 +6,7 @@ from django.urls import reverse
 
 class OdaiModelTests(TestCase):
     def test_answer_list_order(self):
-        odai = Odai.objects.create(id = 1, odai_text="odada")
+        odai = Odai.objects.create(id = 1, odai_text="test_answer_list_order")
         ans1 = Answer.objects.create(answer_text="ans1", odai_id=1)
         ans2 = Answer.objects.create(answer_text="ans2", odai_id=1)
         ans3 = Answer.objects.create(answer_text="ans3", odai_id=1)
@@ -15,6 +15,13 @@ class OdaiModelTests(TestCase):
         ans2.save()
         self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans1>', '<Answer: ans2_2>','<Answer: ans3>'])
 
+    def test_number_one_answer(self):
+        odai = Odai.objects.create(id=1, odai_text="test_number_one_answer")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, free_vote_score=1)
+        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, free_vote_score=2)
+        anslist = odai.answer_list()
+        self.assertFalse(anslist[0].is_number_one)
+        self.assertTrue(anslist[1].is_number_one)
 
 class IndexViewAnswersTests(TestCase):
     def test_no_answers(self):

@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 # Create your models here.
+from django.db.models import Max
 
 class Odai(models.Model):
     odai_text = models.CharField(max_length=100)
@@ -10,7 +11,15 @@ class Odai(models.Model):
     def __str__(self):
         return self.odai_text
     def answer_list(self):
-        return self.answer_set.all().order_by('id')
+        anslist = self.answer_set.all().order_by('id')
+        # checking number one answer from here
+        max_free_vote_score_dict = self.answer_set.aggregate(Max('free_vote_score'))
+        for answer in anslist:
+            if answer.free_vote_score == round(max_free_vote_score_dict["free_vote_score__max"]):
+                answer.is_number_one = True
+            else:
+                answer.is_number_one = False
+        return anslist
 
 class Answer(models.Model):
     odai = models.ForeignKey(Odai, on_delete=models.CASCADE)

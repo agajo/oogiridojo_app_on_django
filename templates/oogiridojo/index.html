@@ -17,14 +17,17 @@
                     <input type="hidden" name="odai_id" value = {{ odai.id }}>
                 </form>
             <form action = "{% url 'oogiridojo:index' %}" method="post">
+                {% csrf_token %}
                 {% if odai.answer_set.all %}
                         <ul>
                         {% for answer in odai.answer_list %}
                             <li>
                                 {{ answer.answer_text }}
                                 <strong>--{{ answer.free_vote_score }}</strong>
-                                {% csrf_token %}
                                 <button name="free_vote_button" value="{{ answer.id }}">良い</button>
+                                {% if answer.is_number_one %}
+                                    <strong><font color="red">１位！</font></strong>
+                                {% endif %}
                             </li>
                         {% endfor %}
                         </ul>
