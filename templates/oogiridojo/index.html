@@ -24,7 +24,7 @@
                             <li>
                                 {{ answer.answer_text }}
                                 <strong>--{{ answer.free_vote_score }}</strong>
-                                <button class = "free_vote_button" name="free_vote_button" value="{{ answer.id }}">良い</button>
+                                <button type='button' class = "free_vote_button" name="free_vote_button" value="{{ answer.id }}">良い</button>
                                 {% if answer.is_number_one %}
                                     <strong><font color="red">１位！</font></strong>
                                 {% endif %}
