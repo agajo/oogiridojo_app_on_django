@@ -46,8 +46,8 @@ class IndexViewAnswersTests(TestCase):
     def test_free_vote_score_increment(self):
         odai = Odai.objects.create(odai_text="oda")
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id)
-        response = self.client.post(reverse("oogiridojo:index"), {'free_vote_button':answer.id})
-        self.assertContains(response,"<strong>--2</strong>")
+        response = self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
+        self.assertEqual(response.json()["newscore"], 2)
 
     def test_no_odai(self):
         response = self.client.get(reverse('oogiridojo:index'))

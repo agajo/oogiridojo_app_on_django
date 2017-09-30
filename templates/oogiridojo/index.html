@@ -16,7 +16,7 @@
                     <input type="submit" value="回答を投稿する">
                     <input type="hidden" name="odai_id" value = {{ odai.id }}>
                 </form>
-            <form id="free_vote_form" action = "{% url 'oogiridojo:index' %}" method="post">
+            <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
                 {% csrf_token %}
                 {% if odai.answer_set.all %}
                         <ul>
