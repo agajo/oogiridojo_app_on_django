@@ -8,19 +8,26 @@
     
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="{% static 'oogiridojo/style.css' %}">
     <title>岡竜之介の大喜利道場</title>
 </head>
 <body>
-<h1 id="site_name">岡竜之介の大喜利道場</h1>
 
+<header class="navbar navbar-expand navbar-light bg-light flex-column">
+    <h1 id="site_name" class="navbar-brand">岡竜之介の大喜利道場</h1>
+</header>
+<div class="container">
 {% if odai_list %}
     {% for odai in odai_list %}
-        <section id="odai{{ forloop.counter }}">
-            <h2>お題：{{ odai.odai_text }}</h2>
+        <section id="odai{{ forloop.counter }}" class="odai_section">
+            <h2 class="odai_text">{{ odai.odai_text }}</h2>
                 <form id="answer_form" action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
                     {% csrf_token %}
-                    <input type="text" name="answer_text" placeholder="例：{{ odai.example_text }}" required>
-                    <input type="submit" value="回答を投稿する">
+                    <div class="row">
+                    <input type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
+                    <input type="submit" class="col-4 btn btn-danger btn-sm" value="回答を投稿する">
+                    </div><!-- end of .row -->
                     <input type="hidden" name="odai_id" value = {{ odai.id }}>
                 </form>
             <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
@@ -28,10 +35,10 @@
                 {% if odai.answer_set.all %}
                         <ul>
                         {% for answer in odai.answer_list %}
-                            <li>
+                            <li class="answer_text">
                                 {{ answer.answer_text }}
                                 <strong>--{{ answer.free_vote_score }}</strong>
-                                <button type='button' class = "free_vote_button" name="free_vote_button" value="{{ answer.id }}">良い</button>
+                                <button type='button' class = "free_vote_button btn btn-outline-primary btn-sm" name="free_vote_button" value="{{ answer.id }}">良い</button>
                                 {% if answer.is_number_one %}
                                     <strong><font color="red">１位！</font></strong>
                                 {% endif %}
@@ -47,6 +54,8 @@
 {% else %}
     <p>お題がありません。</p>
 {% endif %}
+
+</div><!-- end of container -->
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->

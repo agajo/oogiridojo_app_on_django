@@ -1,0 +1,12 @@
+body{
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","游ゴシック Medium",YuGothic,YuGothicM,"Hiragino Kaku Gothic ProN",メイリオ,Meiryo,sans-serif;
+}
+h2.odai_text{
+    font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
+}
+section.odai_section{
+    margin-top:10px;
+}
+li.answer_text{
+    margin-top:2px;
+}
