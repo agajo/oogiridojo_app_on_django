@@ -49,6 +49,12 @@ class IndexViewAnswersTests(TestCase):
         response = self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
         self.assertEqual(response.json()["newscore"], 2)
 
+    def test_odai_order(self):
+        odai1 = Odai.objects.create(odai_text="test_odai_order1")
+        odai2 = Odai.objects.create(odai_text="test_odai_order2")
+        response = self.client.get(reverse('oogiridojo:index'))
+        self.assertQuerysetEqual(response.context['odai_list'],['<Odai: test_odai_order2>','<Odai: test_odai_order1>'])
+
     def test_no_odai(self):
         response = self.client.get(reverse('oogiridojo:index'))
         self.assertContains(response,"お題がありません")

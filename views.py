@@ -2,16 +2,18 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.http.response import JsonResponse
+from django.views import generic
 
 # Create your views here.
 
 from .models import Answer
 from .models import Odai
 
-def index(request):
-    odai_list = Odai.objects.all().order_by('id').reverse()
-    context = {'odai_list': odai_list}
-    return render(request, 'oogiridojo/index.html', context)
+class IndexView(generic.ListView):
+    model = Odai
+    template_name = 'oogiridojo/index.html'
+    def get_queryset(self):
+        return Odai.objects.all().order_by('id').reverse()
 
 def answer_submit(request):
     answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'])
