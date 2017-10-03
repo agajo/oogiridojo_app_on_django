@@ -3,9 +3,13 @@ body{
 }
 h2.odai_text{
     font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
+    font-size:1.5rem;
 }
 section.odai_section{
     margin-top:10px;
+}
+ul.answer_list{
+    padding-left:15px;
 }
 li.answer_text{
     margin-top:2px;

@@ -33,7 +33,7 @@
             <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
                 {% csrf_token %}
                 {% if odai.answer_set.all %}
-                        <ul>
+                        <ul class="answer_list">
                         {% for answer in odai.answer_list %}
                             <li class="answer_text">
                                 {{ answer.answer_text }}
