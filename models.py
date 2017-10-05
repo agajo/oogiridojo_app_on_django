@@ -15,7 +15,7 @@ class Odai(models.Model):
         # checking number one answer from here
         max_free_vote_score_dict = self.answer_set.aggregate(Max('free_vote_score'))
         for answer in anslist:
-            if answer.free_vote_score == round(max_free_vote_score_dict["free_vote_score__max"]):
+            if answer.free_vote_score == max_free_vote_score_dict["free_vote_score__max"]:
                 answer.is_number_one = True
             else:
                 answer.is_number_one = False
@@ -28,3 +28,10 @@ class Answer(models.Model):
     free_vote_score = models.PositiveIntegerField(default=0)
     def __str__(self):
         return self.answer_text
+
+class Tsukkomi(models.Model):
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    tsukkomi_text = models.CharField(max_length=140)
+    creation_date = models.DateTimeField('date created', default=timezone.now)
+    def __str__(self):
+        return self.tsukkomi_text

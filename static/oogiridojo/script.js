@@ -11,4 +11,17 @@ $(function(){
             $(this).prev("strong").text("--"+newscore["newscore"]);
         });
     });
+
+    $(".tsukkomi_submit_button").on('click',function(){
+        $.ajax({
+            url:$(this).attr('formaction'),
+            type: 'post',
+            data: 'csrfmiddlewaretoken='+$(this).closest('form').find("input[name='csrfmiddlewaretoken']").val()+'&answer_id='+$(this).val()+'&tsukkomi_text='+$(this).prev("input").val(),
+            dataType:"json",
+            context:$(this),
+        }).done(function(return_tsukkomi){
+            $(this).closest('div').next('ul.tsukkomi_list').append('<li class="tsukkomi_text">'+return_tsukkomi["return_tsukkomi"]);
+            $(this).prev("input").val("");
+        });
+    });
 });

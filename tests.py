@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import Odai, Answer
+from .models import Odai, Answer, Tsukkomi
 from django.urls import reverse
 
 # Create your tests here.
@@ -43,11 +43,27 @@ class IndexViewAnswersTests(TestCase):
         response = self.client.get(reverse('oogiridojo:index'))
         self.assertContains(response,"<strong>--1</strong>")
 
+    def test_an_answer_with_tsukkomi(self):
+        odai = Odai.objects.create(odai_text="oda")
+        answer = Answer.objects.create(answer_text="ふが", odai_id = odai.id)
+        tsukkomi = Tsukkomi.objects.create(tsukkomi_text="つっこみます", answer_id=answer.id)
+        response = self.client.get(reverse('oogiridojo:index'))
+        self.assertContains(response,"つっこみます")
+
+
     def test_free_vote_score_increment(self):
         odai = Odai.objects.create(odai_text="oda")
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id)
         response = self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
         self.assertEqual(response.json()["newscore"], 2)
+
+    def test_tsukkomi_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id)
+        response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer.id, 'tsukkomi_text':"つっこみ"})
+        self.assertEqual(response.json()["return_tsukkomi"],"つっこみ")
+        
+        
 
     def test_odai_order(self):
         odai1 = Odai.objects.create(odai_text="test_odai_order1")
