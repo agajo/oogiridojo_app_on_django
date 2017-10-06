@@ -41,7 +41,7 @@
                                 {{ answer.answer_text }}
                                 <strong>--{{ answer.free_vote_score }}</strong>
                                 <button type='button' class = "free_vote_button btn btn-outline-primary btn-sm" name="free_vote_button" value="{{ answer.id }}">良い</button>
-                                <button type='button' class="open_tsukkomi_form_button btn btn-outline-success btn-sm" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">ツッコむ</button>
+                                <button type='button' class="open_tsukkomi_form_button btn btn-outline-danger btn-sm" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">ツッコむ</button>
                                 {% if answer.is_number_one %}
                                     <strong><font color="red">１位！</font></strong>
                                 {% endif %}
@@ -49,7 +49,7 @@
                                 <!-- tsukkomi form from here. default collapsed. -->
                                 <div id="tsukkomi_form_{{ answer.id }}" class="collapse">
                                     <input type="text" name="tsukkomi_text" class="form-control">
-                                    <button type='button' class = "tsukkomi_submit_button btn btn-outline-success btn-sm" name="tsukkomi_submit_button" formaction="{% url 'oogiridojo:tsukkomi_submit' %}" value="{{ answer.id }}">投稿する</button>
+                                    <button type='button' class = "tsukkomi_submit_button btn btn-danger btn-sm" name="tsukkomi_submit_button" formaction="{% url 'oogiridojo:tsukkomi_submit' %}" value="{{ answer.id }}">投稿する</button>
                                 </div>
                                 <!-- tsukkomi form end -->
 
@@ -60,6 +60,7 @@
                                     </li>
                                 {% endfor %}
                                 </ul>
+
                             </li>
                         {% endfor %}
                         </ul>

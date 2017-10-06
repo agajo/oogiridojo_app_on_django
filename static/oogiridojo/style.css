@@ -14,7 +14,11 @@ ul.answer_list{
 }
 li.answer_text{
     margin-top:2px;
+    padding-bottom:5px;
 }
 ul.tsukkomi_list{
     padding-left:20px;
+}
+li.tsukkomi_text{
+    color:#b44;
 }
