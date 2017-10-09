@@ -36,7 +36,7 @@
                 {% csrf_token %}
                 {% if odai.answer_set.all %}
                         <ul class="answer_list">
-                        {% for answer in odai.answer_list %}
+                        {% for answer in odai.answer_list.reverse %}
                             <li class="answer_text">
                                 {{ answer.answer_text }}
                                 <strong>--{{ answer.free_vote_score }}</strong>
