@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.http.response import JsonResponse
 from django.views import generic
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 # Create your views here.
 
@@ -11,6 +12,13 @@ from .models import Odai, Answer, Tsukkomi
 class IndexView(generic.ListView):
     model = Odai
     template_name = 'oogiridojo/index.html'
+    def get_queryset(self):
+        return Odai.objects.all().order_by('id').reverse()
+
+class JudgementView(PermissionRequiredMixin, generic.ListView):
+    permission_required = 'oogiridojo.can_add_judgement'
+    model = Odai
+    template_name = 'oogiridojo/judgement.html'
     def get_queryset(self):
         return Odai.objects.all().order_by('id').reverse()
 

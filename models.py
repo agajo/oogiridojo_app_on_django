@@ -35,3 +35,11 @@ class Tsukkomi(models.Model):
     creation_date = models.DateTimeField('date created', default=timezone.now)
     def __str__(self):
         return self.tsukkomi_text
+
+class Judgement(models.Model):
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    judgement_text = models.CharField(max_length=140)
+    judgement_score = models.PositiveIntegerField(default=0)
+    creation_date = models.DateTimeField('date created', default=timezone.now)
+    def __str__(self):
+        return self.judgement_text

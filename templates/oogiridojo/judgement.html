@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    {% load static %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="{% static 'oogiridojo/style.css' %}">
+    <title>岡竜之介の大喜利道場</title>
+</head>
+<body>
+
+<header class="navbar navbar-expand navbar-light bg-light flex-column">
+    <h1 id="site_name" class="navbar-brand">岡竜之介の大喜利道場</h1>
+</header>
+<div class="container">
+{% if odai_list %}
+    {% for odai in odai_list %}
+        <section id="odai{{ forloop.counter }}" class="odai_section">
+            <h2 class="odai_text">{{ odai.odai_text }}</h2>
+                <form id="answer_form" action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
+                    {% csrf_token %}
+
+                    <div class="row"><!-- .row from here -->
+                    <input type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
+                    <input type="submit" class="col-4 btn btn-danger btn-sm" value="回答を投稿する">
+                    </div><!-- end of .row -->
+
+                    <input type="hidden" name="odai_id" value = {{ odai.id }}>
+                </form>
+            <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
+                {% csrf_token %}
+                {% if odai.answer_set.all %}
+                        <ul class="answer_list">
+                        {% for answer in odai.answer_list.reverse %}
+                            <li class="answer_text">
+                                {{ answer.answer_text }}
+                                <strong>--{{ answer.free_vote_score }}</strong>
+                                <button type='button' class = "free_vote_button btn btn-outline-primary btn-sm" name="free_vote_button" value="{{ answer.id }}">良い</button>
+                                <button type='button' class="open_tsukkomi_form_button btn btn-outline-danger btn-sm" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">ツッコむ</button>
+                                {% if answer.is_number_one %}
+                                    <strong><font color="red">１位！</font></strong>
+                                {% endif %}
+
+                                <!-- tsukkomi form from here. default collapsed. -->
+                                <div id="tsukkomi_form_{{ answer.id }}" class="collapse">
+                                    <input type="text" name="tsukkomi_text" class="form-control">
+                                    <button type='button' class = "tsukkomi_submit_button btn btn-danger btn-sm" name="tsukkomi_submit_button" formaction="{% url 'oogiridojo:tsukkomi_submit' %}" value="{{ answer.id }}" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">投稿する</button>
+                                </div>
+                                <!-- tsukkomi form end -->
+
+                                <ul class="tsukkomi_list">
+                                {% for tsukkomi in answer.tsukkomi_set.all %}
+                                    <li class="tsukkomi_text">
+                                        {{ tsukkomi.tsukkomi_text }}
+                                    </li>
+                                {% endfor %}
+                                </ul>
+
+                            </li>
+                        {% endfor %}
+                        </ul>
+                {% else %}
+                    <p>回答がありません。</p>
+                {% endif %}
+            </form>
+        </section>
+    {% endfor %}
+{% else %}
+    <p>お題がありません。</p>
+{% endif %}
+
+</div><!-- end of container -->
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+<script src="{% static 'oogiridojo/script.js' %}"></script>
+</body>
+</html>
