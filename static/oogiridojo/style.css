@@ -22,3 +22,17 @@ ul.tsukkomi_list{
 li.tsukkomi_text{
     color:#b44;
 }
+span.judgement_rank_1{
+    color:#3a3;
+}
+span.judgement_rank_2{
+    color:#ea0;
+    font-size:1.1rem;
+}
+span.judgement_rank_3{
+    color:#e00;
+    font-size:1.2rem;
+}
+span.judgement_text{
+    color:#3a3;
+}

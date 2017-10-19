@@ -61,6 +61,19 @@
                                 {% endfor %}
                                 </ul>
 
+                                <!-- 評価を表示します -->
+                                {% if answer.judgement_set.all %}
+                                    {% for judgement in answer.judgement_set.all %}
+                                        <span class="judgement_rank judgement_rank_{{ judgement.judgement_score }}">
+                                            {{ judgement.judgement_score }}点。
+                                        </span>
+                                        <span class="judgement_text">
+                                            {{ judgement.judgement_text }}
+                                        </span>
+                                    {% endfor %}
+                                {% endif %}
+                                <!-- 評価ここまで -->
+
                             </li>
                         {% endfor %}
                         </ul>

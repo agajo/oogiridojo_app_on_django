@@ -1,6 +1,7 @@
-from django.test import TestCase
-from .models import Odai, Answer, Tsukkomi
+from django.test import TestCase, Client
+from .models import Odai, Answer, Tsukkomi, Judgement
 from django.urls import reverse
+from django.contrib.auth.models import User, Permission
 
 # Create your tests here.
 
@@ -62,8 +63,6 @@ class IndexViewAnswersTests(TestCase):
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id)
         response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer.id, 'tsukkomi_text':"つっこみ"})
         self.assertEqual(response.json()["return_tsukkomi"],"つっこみ")
-        
-        
 
     def test_odai_order(self):
         odai1 = Odai.objects.create(odai_text="test_odai_order1")
@@ -83,3 +82,81 @@ class IndexViewAnswersTests(TestCase):
         #なので、あらためてindexを取得し直す。
         response2 = self.client.get(reverse('oogiridojo:index'))
         self.assertContains(response2,"あんてき")
+
+    def test_show_judgement(self):
+        odai = Odai.objects.create(odai_text="ジャッジあり")
+        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        judgement = Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer.id)
+        response = self.client.get(reverse('oogiridojo:index'))
+        self.assertContains(response,"1点。")
+        self.assertContains(response,"いいね")
+
+class JudgementViewTests(TestCase):
+
+    def test_no_permission(self):
+        response = self.client.get(reverse('oogiridojo:judgement'))
+        # パーミッションがない場合はログインページに飛ばされる。
+        self.assertRedirects(response, reverse('accounts:login')+"?next=/oogiridojo/judgement/")
+        # nextパラメータが付くので注意
+
+    def test_with_permission(self):
+        user = User.objects.create_user(username="judger", password="hoge")
+        # ↑パスワードの設定は必須
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        result = c.login(username="judger",password="hoge")
+        response = c.get(reverse('oogiridojo:judgement'))
+        self.assertEquals(response.status_code,200)
+
+    def test_show_form_when_not_judged(self):
+        odai = Odai.objects.create(odai_text="ジャッジなし")
+        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:judgement'))
+        self.assertEquals(response.status_code,200)
+        self.assertContains(response, "judgement_form")
+        # formが表示されることを、formのclassの名前でチェックしてます。
+
+    def test_not_show_form_when_judged(self):
+        odai = Odai.objects.create(odai_text="ジャッジあり2")
+        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        judgement = Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer.id)
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:judgement'))
+        self.assertEquals(response.status_code,200)
+        self.assertContains(response,"1点。")
+        self.assertContains(response,"いいね")
+        self.assertNotContains(response, "judgement_form")
+        # formが表示されないことを、formのclassの名前でチェックしてます。
+
+    def test_add_judgement_no_permission(self):
+        odai = Odai.objects.create(odai_text="oda")
+        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        response = self.client.post(reverse("oogiridojo:judgement_submit"), {'answer_id':answer.id, 'judgement_text':"だめくそ", 'judgement_score':1})
+        # パーミッションがない場合はログインページに飛ばされる。
+        self.assertRedirects(response, reverse('accounts:login')+"?next=/oogiridojo/judgement_submit/")
+
+    def test_add_judgement_with_permission(self):
+        odai = Odai.objects.create(odai_text="oda")
+        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.post(reverse("oogiridojo:judgement_submit"), {'answer_id':answer.id, 'judgement_text':"だめくそ", 'judgement_score':1})
+        #↑こいつのレスポンスコードは302が返る。リダイレクト前に一回response返してるのか。
+        self.assertEquals(response.status_code,302)
+        #なので、あらためてindexを取得し直す。
+        response2 = self.client.get(reverse('oogiridojo:index'))
+        self.assertContains(response2,"だめくそ")
+        #本当は、わざわざindex.htmlを呼ぶのではなく、データベースに追加されたかどうかだけをチェックしたい。2017-10-19
