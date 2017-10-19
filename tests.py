@@ -14,15 +14,18 @@ class OdaiModelTests(TestCase):
         ans2.answer_text="ans2_2"
         #ポスグレだと、この操作をすることで、取り出される順番が変わることがある。それが発生していないかチェックしている。
         ans2.save()
-        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans1>', '<Answer: ans2_2>','<Answer: ans3>'])
+        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans3>', '<Answer: ans2_2>','<Answer: ans1>'])
+        #最新の投稿を先に表示します。
 
     def test_number_one_answer(self):
         odai = Odai.objects.create(id=1, odai_text="test_number_one_answer")
         ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, free_vote_score=1)
-        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, free_vote_score=2)
+        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, free_vote_score=300)
+        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, free_vote_score=50)
         anslist = odai.answer_list()
         self.assertFalse(anslist[0].is_number_one)
         self.assertTrue(anslist[1].is_number_one)
+        self.assertFalse(anslist[2].is_number_one)
 
 class IndexViewAnswersTests(TestCase):
     def test_no_answers(self):

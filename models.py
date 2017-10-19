@@ -11,7 +11,7 @@ class Odai(models.Model):
     def __str__(self):
         return self.odai_text
     def answer_list(self):
-        anslist = self.answer_set.all().order_by('id')
+        anslist = self.answer_set.all().order_by('id').reverse()
         # checking number one answer from here
         max_free_vote_score_dict = self.answer_set.aggregate(Max('free_vote_score'))
         for answer in anslist:
