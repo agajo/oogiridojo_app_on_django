@@ -44,4 +44,4 @@ def tsukkomi_submit(request):
 def judgement_submit(request):
     judgement = Judgement(answer_id = request.POST["answer_id"], judgement_text = request.POST['judgement_text'], judgement_score = request.POST['judgement_score'])
     judgement.save()
-    return HttpResponseRedirect(reverse('oogiridojo:judgement'))
+    return JsonResponse({"score":judgement.judgement_score, "text":judgement.judgement_text})

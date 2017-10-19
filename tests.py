@@ -154,9 +154,5 @@ class JudgementViewTests(TestCase):
         c = Client()
         c.login(username="judger", password="hoge")
         response = c.post(reverse("oogiridojo:judgement_submit"), {'answer_id':answer.id, 'judgement_text':"だめくそ", 'judgement_score':1})
-        #↑こいつのレスポンスコードは302が返る。リダイレクト前に一回response返してるのか。
-        self.assertEquals(response.status_code,302)
-        #なので、あらためてindexを取得し直す。
-        response2 = self.client.get(reverse('oogiridojo:index'))
-        self.assertContains(response2,"だめくそ")
-        #本当は、わざわざindex.htmlを呼ぶのではなく、データベースに追加されたかどうかだけをチェックしたい。2017-10-19
+        self.assertEqual(response.json()["score"], "1")
+        self.assertEqual(response.json()["text"],"だめくそ")

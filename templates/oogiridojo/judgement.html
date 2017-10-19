@@ -54,14 +54,14 @@
                                 {% else %}
                                     <form class="judgement_form" action="{% url 'oogiridojo:judgement_submit' %}" method="POST">
                                         {% csrf_token %}
+                                        <input type="hidden" name="answer_id" value={{ answer.id }}>
                                         ランク
                                         <input type="radio" required name="judgement_score" value=1>1
-                                        <input type="radio" required name="judgement_score" value=2>2
+                                        <input type="radio" required name="judgement_score" value=2 checked="checked">2
                                         <input type="radio" required name="judgement_score" value=3>3
                                         コメント
                                         <input type="text" required name="judgement_text">
-                                        <input type="hidden" name="answer_id" value={{ answer.id }}>
-                                        <input type="submit" value="ジャッジ">
+                                        <input type="button" class="judge_button" value="ジャッジ">
                                     </form>
                                 {% endif %}
 
@@ -86,6 +86,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
 
-<script src="{% static 'oogiridojo/script.js' %}"></script>
+<script src="{% static 'oogiridojo/judgement_script.js' %}"></script>
 </body>
 </html>
