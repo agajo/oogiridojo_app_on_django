@@ -35,10 +35,10 @@
             <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
                 {% csrf_token %}
                 {% if odai.answer_set.all %}
-                        <ul class="answer_list">
+                        <ul class="answer_list list-group">
                         {% for answer in odai.answer_list %}
                         {# ここでodai.answer_list.reverseとして逆順にすると、何故かis_number_oneが全部消えちゃう #}
-                            <li class="answer_text">
+                            <li class="answer_text list-group-item">
                                 {{ answer.answer_text }}
                                 <strong>--{{ answer.free_vote_score }}</strong>
                                 <button type='button' class = "free_vote_button btn btn-outline-primary btn-sm" name="free_vote_button" value="{{ answer.id }}">良い</button>

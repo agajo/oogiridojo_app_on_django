@@ -24,11 +24,11 @@
             <h2 class="odai_text">{{ odai.odai_text }}</h2>
 
                 {% if odai.answer_set.all %}
-                        <ul class="answer_list">
+                        <ul class="answer_list list-group">
                         {% for answer in odai.answer_list %}
                             {% if answer.judgement_set.all %}
                             {% else %}
-                                <li class="answer_text">
+                                <li class="answer_text list-group-item">
                                     {{ answer.answer_text }}
                                     <strong>--{{ answer.free_vote_score }}</strong>
                                     {% if answer.is_number_one %}
