@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
 
     <link rel="stylesheet" href="{% static 'oogiridojo/style.css' %}">
-    <title>岡竜之介の大喜利道場</title>
+    <title>ジャッジページ - 岡竜之介の大喜利道場</title>
 </head>
 <body>
 
 <header class="navbar navbar-expand navbar-light bg-light flex-column">
-    <h1 id="site_name" class="navbar-brand">岡竜之介の大喜利道場</h1>
+    <h1 id="site_name" class="navbar-brand">ジャッジページ - 岡竜之介の大喜利道場</h1>
 </header>
 <div class="container">
 {% if odai_list %}
@@ -25,24 +25,25 @@
 
                 {% if odai.answer_set.all %}
                         <ul class="answer_list">
-                        {% for answer in odai.answer_list.reverse %}
-                            <li class="answer_text">
-                                {{ answer.answer_text }}
-                                <strong>--{{ answer.free_vote_score }}</strong>
-                                {% if answer.is_number_one %}
-                                    <strong><font color="red">１位！</font></strong>
-                                {% endif %}
+                        {% for answer in odai.answer_list %}
+                            {% if answer.judgement_set.all %}
+                            {% else %}
+                                <li class="answer_text">
+                                    {{ answer.answer_text }}
+                                    <strong>--{{ answer.free_vote_score }}</strong>
+                                    {% if answer.is_number_one %}
+                                        <strong><font color="red">１位！</font></strong>
+                                    {% endif %}
 
 
-                                <ul class="tsukkomi_list">
-                                {% for tsukkomi in answer.tsukkomi_set.all %}
-                                    <li class="tsukkomi_text">
-                                        {{ tsukkomi.tsukkomi_text }}
-                                    </li>
-                                {% endfor %}
-                                </ul>
+                                    <ul class="tsukkomi_list">
+                                    {% for tsukkomi in answer.tsukkomi_set.all %}
+                                        <li class="tsukkomi_text">
+                                            {{ tsukkomi.tsukkomi_text }}
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
 
-                                {% if answer.judgement_set.all %}
                                     {% for judgement in answer.judgement_set.all %}
                                         <span class="judgement_rank judgement_rank_{{ judgement.judgement_score }}">
                                             {{ judgement.judgement_score }}点。
@@ -51,7 +52,6 @@
                                             {{ judgement.judgement_text }}
                                         </span>
                                     {% endfor %}
-                                {% else %}
                                     <form class="judgement_form" action="{% url 'oogiridojo:judgement_submit' %}" method="POST">
                                         {% csrf_token %}
                                         <input type="hidden" name="answer_id" value={{ answer.id }}>
@@ -63,9 +63,9 @@
                                         <input type="text" required name="judgement_text">
                                         <input type="button" class="judge_button" value="ジャッジ">
                                     </form>
-                                {% endif %}
 
                             </li>
+                            {% endif %}
                         {% endfor %}
                         </ul>
                 {% else %}

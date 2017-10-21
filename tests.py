@@ -112,7 +112,7 @@ class JudgementViewTests(TestCase):
         response = c.get(reverse('oogiridojo:judgement'))
         self.assertEquals(response.status_code,200)
 
-    def test_show_form_when_not_judged(self):
+    def test_show_answer_when_not_judged(self):
         odai = Odai.objects.create(odai_text="ジャッジなし")
         answer = Answer.objects.create(answer_text="あご", odai_id = odai.id)
         user = User.objects.create_user("judger", password="hoge")
@@ -122,10 +122,11 @@ class JudgementViewTests(TestCase):
         c.login(username="judger", password="hoge")
         response = c.get(reverse('oogiridojo:judgement'))
         self.assertEquals(response.status_code,200)
+        self.assertContains(response,"あご")
         self.assertContains(response, "judgement_form")
         # formが表示されることを、formのclassの名前でチェックしてます。
 
-    def test_not_show_form_when_judged(self):
+    def test_not_show_answer_when_judged(self):
         odai = Odai.objects.create(odai_text="ジャッジあり2")
         answer = Answer.objects.create(answer_text="あご", odai_id = odai.id)
         judgement = Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer.id)
@@ -136,8 +137,9 @@ class JudgementViewTests(TestCase):
         c.login(username="judger", password="hoge")
         response = c.get(reverse('oogiridojo:judgement'))
         self.assertEquals(response.status_code,200)
-        self.assertContains(response,"1点。")
-        self.assertContains(response,"いいね")
+        self.assertNotContains(response,"あご")
+        self.assertNotContains(response,"1点。")
+        self.assertNotContains(response,"いいね")
         self.assertNotContains(response, "judgement_form")
         # formが表示されないことを、formのclassの名前でチェックしてます。
 
