@@ -39,13 +39,17 @@
                         {% for answer in odai.answer_list %}
                         {# ここでodai.answer_list.reverseとして逆順にすると、何故かis_number_oneが全部消えちゃう #}
                             <li class="answer_text list-group-item">
-                                {{ answer.answer_text }}
-                                <strong>--{{ answer.free_vote_score }}</strong>
-                                <button type='button' class = "free_vote_button btn btn-outline-primary btn-sm" name="free_vote_button" value="{{ answer.id }}">良い</button>
-                                <button type='button' class="open_tsukkomi_form_button btn btn-outline-danger btn-sm" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">ツッコむ</button>
-                                {% if answer.is_number_one %}
-                                    <strong><font color="red">１位！</font></strong>
-                                {% endif %}
+                                <div>{{ answer.answer_text }}</div>
+                                <div class="answer_buttons">
+                                    <span {% if answer.is_number_one %}class="number_one_indicator"{% endif %}>
+                                        {% if answer.is_number_one %}
+                                            <strong>１位！</strong>
+                                        {% endif %}
+                                        <strong>{{ answer.free_vote_score }}</strong>
+                                    </span>
+                                    <button type='button' class = "free_vote_button btn btn-outline-primary btn-sm" name="free_vote_button" value="{{ answer.id }}">良い</button>
+                                    <button type='button' class="open_tsukkomi_form_button btn btn-outline-danger btn-sm" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">ツッコむ</button>
+                                </div>
 
                                 <!-- tsukkomi form from here. default collapsed. -->
                                 <div id="tsukkomi_form_{{ answer.id }}" class="collapse">

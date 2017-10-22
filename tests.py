@@ -45,7 +45,7 @@ class IndexViewAnswersTests(TestCase):
         odai = Odai.objects.create(odai_text="oda")
         Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id)
         response = self.client.get(reverse('oogiridojo:index'))
-        self.assertContains(response,"<strong>--1</strong>")
+        self.assertContains(response,"<strong>1</strong>")
 
     def test_an_answer_with_tsukkomi(self):
         odai = Odai.objects.create(odai_text="oda")

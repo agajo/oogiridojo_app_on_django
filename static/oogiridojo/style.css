@@ -38,3 +38,9 @@ span.judgement_rank_3{
 span.judgement_text{
     color:#3a3;
 }
+div.answer_buttons{
+    text-align:right;
+}
+span.number_one_indicator{
+    color:#e00;
+}
