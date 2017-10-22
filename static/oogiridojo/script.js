@@ -8,7 +8,7 @@ $(function(){
             dataType:"json",
             context:$(this),
         }).done(function(newscore){
-            $(this).prev("strong").text(newscore["newscore"]);
+            $(this).prev("span").children("strong.free_vote_score").text(newscore["newscore"]);
         });
     });
 
