@@ -28,4 +28,15 @@ $(function(){
         }
     });
 
+    //回答の二重投稿防止。これで止めるのはボタン連打だけ。更新とかは関与しない。
+    $("form#answer_form").submit(function(){
+    //on click ではなく、formがsubmitされた時だけ実行。
+        var me = $(this);
+        //下層のfunction内にまで同じthisを渡してくれないので、変数に格納しておきます。
+        me.find("input.answer_submit_button").prop("disabled",true);
+        setTimeout(function(self){
+            me.find("input.answer_submit_button").prop("disabled",false);
+        }, 10000);
+    });
+
 });
