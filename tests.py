@@ -8,14 +8,21 @@ from django.contrib.auth.models import User, Permission
 class OdaiModelTests(TestCase):
     def test_answer_list_order(self):
         odai = Odai.objects.create(id = 1, odai_text="test_answer_list_order")
-        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1)
-        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1)
-        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1)
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03")
+        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:03")
+        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03")
         ans2.answer_text="ans2_2"
         #ポスグレだと、この操作をすることで、取り出される順番が変わることがある。それが発生していないかチェックしている。
         ans2.save()
         self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans3>', '<Answer: ans2_2>','<Answer: ans1>'])
         #最新の投稿を先に表示します。
+
+    def test_answer_list_order_with_modified_date(self):
+        odai = Odai.objects.create(id = 1, odai_text="answer_list_order_with_modified_date")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03")
+        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:04")
+        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03")
+        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans2>', '<Answer: ans3>','<Answer: ans1>'])
 
     def test_number_one_answer(self):
         odai = Odai.objects.create(id=1, odai_text="test_number_one_answer")
@@ -54,7 +61,6 @@ class IndexViewAnswersTests(TestCase):
         response = self.client.get(reverse('oogiridojo:index'))
         self.assertContains(response,"つっこみます")
 
-
     def test_free_vote_score_increment(self):
         odai = Odai.objects.create(odai_text="oda")
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id)
@@ -66,6 +72,14 @@ class IndexViewAnswersTests(TestCase):
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id)
         response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer.id, 'tsukkomi_text':"つっこみ"})
         self.assertEqual(response.json()["return_tsukkomi"],"つっこみ")
+
+    def test_tsukkomi_submit_and_modify_answer_date(self):
+        odai = Odai.objects.create(odai_text="oda")
+        answer1 = Answer.objects.create(answer_text="ans1", odai_id = odai.id, modified_date="2017-01-01T01:01:01")
+        answer2 = Answer.objects.create(answer_text="ans2", odai_id = odai.id, modified_date="2017-01-01T01:01:01")
+        answer3 = Answer.objects.create(answer_text="ans3", odai_id = odai.id, modified_date="2017-01-01T01:01:01")
+        response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer2.id, 'tsukkomi_text':"つっこみ"})
+        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans2>', '<Answer: ans3>','<Answer: ans1>'])
 
     def test_odai_order(self):
         odai1 = Odai.objects.create(odai_text="test_odai_order1")

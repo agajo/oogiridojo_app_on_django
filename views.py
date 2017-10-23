@@ -5,6 +5,7 @@ from django.http.response import JsonResponse
 from django.views import generic
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.utils import timezone
 
 # Create your views here.
 
@@ -38,6 +39,9 @@ def free_vote(request):
 def tsukkomi_submit(request):
     tsukkomi = Tsukkomi(tsukkomi_text = request.POST['tsukkomi_text'], answer_id = request.POST['answer_id'])
     tsukkomi.save()
+    answer = Answer.objects.get(pk=request.POST['answer_id'])
+    answer.modified_date = timezone.now()
+    answer.save()
     return JsonResponse({"return_tsukkomi":tsukkomi.tsukkomi_text})
 
 @permission_required('oogiridojo.add_judgement')

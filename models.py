@@ -11,7 +11,7 @@ class Odai(models.Model):
     def __str__(self):
         return self.odai_text
     def answer_list(self):
-        anslist = self.answer_set.all().order_by('id').reverse()
+        anslist = self.answer_set.all().order_by('-modified_date','-id')
         # checking number one answer from here
         max_free_vote_score_dict = self.answer_set.aggregate(Max('free_vote_score'))
         for answer in anslist:
@@ -25,6 +25,7 @@ class Answer(models.Model):
     odai = models.ForeignKey(Odai, on_delete=models.CASCADE)
     answer_text = models.CharField(max_length=200)
     creation_date = models.DateTimeField('date created', default=timezone.now)
+    modified_date = models.DateTimeField('date modified', default=timezone.now)
     free_vote_score = models.PositiveIntegerField(default=0)
     def __str__(self):
         return self.answer_text
