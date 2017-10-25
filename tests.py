@@ -109,8 +109,25 @@ class OdaiViewAnswersTests(TestCase):
         self.assertContains(response,"1点。")
         self.assertContains(response,"いいね")
 
-class JudgementViewTests(TestCase):
+    def test_show_judgement_link_with_permission(self):
+        odai = Odai.objects.create(odai_text="うで")
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
+        self.assertContains(response,'ジャッジ</a>')
 
+    def test_not_show_judgement_link_without_permission(self):
+        odai = Odai.objects.create(odai_text="うで")
+        user = User.objects.create_user("judger", password="hoge")
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
+        self.assertNotContains(response,'ジャッジ</a>')
+
+class JudgementViewTests(TestCase):
     def test_no_permission(self):
         odai = Odai.objects.create(odai_text="ッジ")
         response = self.client.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
