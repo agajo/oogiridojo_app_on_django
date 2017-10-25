@@ -34,31 +34,41 @@ class OdaiModelTests(TestCase):
         self.assertTrue(anslist[1].is_number_one)
         self.assertFalse(anslist[2].is_number_one)
 
-class IndexViewAnswersTests(TestCase):
-    def test_no_answers(self):
-        Odai.objects.create(odai_text="odaoda")
+class IndexViewTests(TestCase):
+    def test_only_one_newest_odai_shown(self):
+        odai1 = Odai.objects.create(odai_text="test_odai_order1")
+        odai2 = Odai.objects.create(odai_text="test_odai_order2")
         response = self.client.get(reverse('oogiridojo:index'))
+        self.assertQuerysetEqual(response.context['odai_list'],['<Odai: test_odai_order2>'])
+
+    def test_no_odai(self):
+        response = self.client.get(reverse('oogiridojo:index'))
+        self.assertContains(response,"お題がありません")
+
+class OdaiViewAnswersTests(TestCase):
+    def test_no_answers(self):
+        odai = Odai.objects.create(odai_text="odaoda")
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "回答がありません")
-        self.assertQuerysetEqual(response.context['odai_list'],['<Odai: odaoda>'])
 
     def test_an_answer(self):
         odai = Odai.objects.create(odai_text="oda")
         Answer.objects.create(answer_text="ほげほげ", odai_id = odai.id)
-        response = self.client.get(reverse('oogiridojo:index'))
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response,"ほげほげ")
 
     def test_an_answer_with_free_vote_score(self):
         odai = Odai.objects.create(odai_text="oda")
         Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id)
-        response = self.client.get(reverse('oogiridojo:index'))
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response,'<strong class="free_vote_score">1</strong>')
 
     def test_an_answer_with_tsukkomi(self):
         odai = Odai.objects.create(odai_text="oda")
         answer = Answer.objects.create(answer_text="ふが", odai_id = odai.id)
         tsukkomi = Tsukkomi.objects.create(tsukkomi_text="つっこみます", answer_id=answer.id)
-        response = self.client.get(reverse('oogiridojo:index'))
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response,"つっこみます")
 
     def test_free_vote_score_increment(self):
@@ -81,49 +91,42 @@ class IndexViewAnswersTests(TestCase):
         response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer2.id, 'tsukkomi_text':"つっこみ"})
         self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans2>', '<Answer: ans3>','<Answer: ans1>'])
 
-    def test_odai_order(self):
-        odai1 = Odai.objects.create(odai_text="test_odai_order1")
-        odai2 = Odai.objects.create(odai_text="test_odai_order2")
-        response = self.client.get(reverse('oogiridojo:index'))
-        self.assertQuerysetEqual(response.context['odai_list'],['<Odai: test_odai_order2>','<Odai: test_odai_order1>'])
-
-    def test_no_odai(self):
-        response = self.client.get(reverse('oogiridojo:index'))
-        self.assertContains(response,"お題がありません")
-
     def test_add_an_answer_to_an_odai(self):
         odai = Odai.objects.create(odai_text="oda")
         response = self.client.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき"})
-        #↑こいつのレスポンスコードは302が返る。リダイレクト前に一回response返してるのか。
-        self.assertEquals(response.status_code,302)
+        #↑こいつのレスポンスコードは302が返る。
+        #redirectのレスポンスを受け取って、クライアントがそのURLに改めてリクエストを出すからね。
+        self.assertRedirects(response,reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         #なので、あらためてindexを取得し直す。
-        response2 = self.client.get(reverse('oogiridojo:index'))
+        response2 = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response2,"あんてき")
 
     def test_show_judgement(self):
         odai = Odai.objects.create(odai_text="ジャッジあり")
         answer = Answer.objects.create(answer_text="あご", odai_id = odai.id)
         judgement = Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer.id)
-        response = self.client.get(reverse('oogiridojo:index'))
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response,"1点。")
         self.assertContains(response,"いいね")
 
 class JudgementViewTests(TestCase):
 
     def test_no_permission(self):
-        response = self.client.get(reverse('oogiridojo:judgement'))
+        odai = Odai.objects.create(odai_text="ッジ")
+        response = self.client.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
         # パーミッションがない場合はログインページに飛ばされる。
-        self.assertRedirects(response, reverse('accounts:login')+"?next=/oogiridojo/judgement/")
+        self.assertRedirects(response, reverse('accounts:login')+"?next=/oogiridojo/odai/"+str(odai.id)+"/judgement/")
         # nextパラメータが付くので注意
 
     def test_with_permission(self):
+        odai = Odai.objects.create(odai_text="ッジ")
         user = User.objects.create_user(username="judger", password="hoge")
         # ↑パスワードの設定は必須
         permission = Permission.objects.get(codename='add_judgement')
         user.user_permissions.add(permission)
         c = Client()
         result = c.login(username="judger",password="hoge")
-        response = c.get(reverse('oogiridojo:judgement'))
+        response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
         self.assertEquals(response.status_code,200)
 
     def test_show_answer_when_not_judged(self):
@@ -134,7 +137,7 @@ class JudgementViewTests(TestCase):
         user.user_permissions.add(permission)
         c = Client()
         c.login(username="judger", password="hoge")
-        response = c.get(reverse('oogiridojo:judgement'))
+        response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
         self.assertEquals(response.status_code,200)
         self.assertContains(response,"あご")
         self.assertContains(response, "judgement_form")
@@ -149,7 +152,7 @@ class JudgementViewTests(TestCase):
         user.user_permissions.add(permission)
         c = Client()
         c.login(username="judger", password="hoge")
-        response = c.get(reverse('oogiridojo:judgement'))
+        response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
         self.assertEquals(response.status_code,200)
         self.assertNotContains(response,"あご")
         self.assertNotContains(response,"1点。")

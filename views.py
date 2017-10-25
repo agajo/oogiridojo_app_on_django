@@ -15,20 +15,22 @@ class IndexView(generic.ListView):
     model = Odai
     template_name = 'oogiridojo/index.html'
     def get_queryset(self):
-        return Odai.objects.all().order_by('id').reverse()
+        return Odai.objects.all().order_by('-id')[:1]
 
-class JudgementView(PermissionRequiredMixin, generic.ListView):
+class OdaiView(generic.DetailView):
+    model = Odai
+    #templateはデフォルトでoogiridojo/odai_detail.htmlが使われる。
+
+class JudgementView(PermissionRequiredMixin, generic.DetailView):
     permission_required = 'oogiridojo.add_judgement'
     # oogiridojo|judgement|Can add judgement は oogiridojo.add_judgement と書くらしいね。どこで定義されてるんだ。
     model = Odai
     template_name = 'oogiridojo/judgement.html'
-    def get_queryset(self):
-        return Odai.objects.all().order_by('id').reverse()
 
 def answer_submit(request):
     answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'])
     answer.save()
-    return HttpResponseRedirect(reverse('oogiridojo:index'))
+    return HttpResponseRedirect(reverse('oogiridojo:odai',kwargs={'pk':request.POST['odai_id']}))
 
 def free_vote(request):
     answer = Answer.objects.get(pk = request.POST['free_vote_button'])
