@@ -10,9 +10,22 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
 
     <link rel="stylesheet" href="{% static 'oogiridojo/style.css' %}">
+    <link rel="stylesheet" href="{% static 'oogiridojo/toggle_switch.css' %}">
     <title>{% block page_title %}岡竜之介の大喜利道場{% endblock %}</title>
 </head>
 <body>
+
+<!-- Audio -->
+<audio id="sound-file1" preload="auto">
+    <source src="{% static 'oogiridojo/yoi.mp3' %}" type="audio/mp3">
+    <source src="{% static 'oogiridojo/yoi.wav' %}" type="audio/wav">
+</audio>
+<audio id="sound-file2" preload="auto">
+    <source src="{% static 'oogiridojo/subarashi.mp3' %}" type="audio/mp3">
+    <source src="{% static 'oogiridojo/subarashi.wav' %}" type="audio/wav">
+</audio>
+<!-- end of Audio -->
+
 
 <header class="navbar navbar-expand-sm navbar-light bg-light">
     <h1 id="site_name" class="navbar-brand">岡竜之介の大喜利道場</h1>
@@ -33,6 +46,20 @@
                         <a class="dropdown-item" href="{% url 'oogiridojo:odai' odai.id %}">{{ odai.odai_text }}</a>
                     {% endfor %}
                 </div>
+            </li>
+            <li class="nav-item">
+            <form>
+                {% csrf_token %}
+                <span class="nav-link">
+                    <label>
+                        <label class="switch">
+                            <input type="checkbox" id="voice_toggle" formaction="{% url 'oogiridojo:voice_toggle' %}" {% if voice_toggle %}checked{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                        <span id="switch_text">音を鳴らす</span>
+                    </label>
+                </span>
+            </form>
             </li>
         </ul>
     </div>

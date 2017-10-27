@@ -51,3 +51,8 @@ def judgement_submit(request):
     judgement = Judgement(answer_id = request.POST["answer_id"], judgement_text = request.POST['judgement_text'], judgement_score = request.POST['judgement_score'])
     judgement.save()
     return JsonResponse({"score":judgement.judgement_score, "text":judgement.judgement_text})
+
+def voice_toggle(request):
+    request.session['voice_toggle'] = request.POST['voice_toggle']
+    request.session.set_expiry(2628000)#有効期限一ヶ月にしてみる。
+    return HttpResponse(request.session['voice_toggle'])

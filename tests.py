@@ -195,3 +195,22 @@ class JudgementViewTests(TestCase):
         response = c.post(reverse("oogiridojo:judgement_submit"), {'answer_id':answer.id, 'judgement_text':"だめくそ", 'judgement_score':1})
         self.assertEqual(response.json()["score"], "1")
         self.assertEqual(response.json()["text"],"だめくそ")
+
+class AudioSessionTests(TestCase):
+    def test_toggle_not_checked_at_first(self):
+        response = self.client.get(reverse('oogiridojo:index'))
+        self.assertContains(response,'<input type="checkbox" id="voice_toggle" formaction="/oogiridojo/voice_toggle/" >')
+
+    def test_toggle_still_on_when_visited_again(self):
+        c = Client()
+        response = c.post(reverse("oogiridojo:voice_toggle"),{'voice_toggle':'true'})
+        self.assertEquals(response.content,b'true')
+        response2 = c.get(reverse("oogiridojo:index"))
+        self.assertContains(response2,'<input type="checkbox" id="voice_toggle" formaction="/oogiridojo/voice_toggle/" checked>')
+        
+    def test_toggle_still_off_when_visited_again(self):
+        c = Client()
+        response = c.post(reverse("oogiridojo:voice_toggle"),{'voice_toggle':'false'})
+        self.assertEquals(response.content,b'false')
+        response2 = c.get(reverse("oogiridojo:index"))
+        self.assertContains(response2,'<input type="checkbox" id="voice_toggle" formaction="/oogiridojo/voice_toggle/" >')
