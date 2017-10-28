@@ -22,7 +22,8 @@ class OdaiModelTests(TestCase):
         ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03")
         ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:04")
         ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03")
-        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans2>', '<Answer: ans3>','<Answer: ans1>'])
+        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans3>', '<Answer: ans2>','<Answer: ans1>'])
+        #modified dateは無視して新しい順に。
 
     def test_number_one_answer(self):
         odai = Odai.objects.create(id=1, odai_text="test_number_one_answer")
@@ -89,7 +90,7 @@ class OdaiViewAnswersTests(TestCase):
         answer2 = Answer.objects.create(answer_text="ans2", odai_id = odai.id, modified_date="2017-01-01T01:01:01")
         answer3 = Answer.objects.create(answer_text="ans3", odai_id = odai.id, modified_date="2017-01-01T01:01:01")
         response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer2.id, 'tsukkomi_text':"つっこみ"})
-        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans2>', '<Answer: ans3>','<Answer: ans1>'])
+        self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans3>', '<Answer: ans2>','<Answer: ans1>'])
 
     def test_add_an_answer_to_an_odai(self):
         odai = Odai.objects.create(odai_text="oda")
