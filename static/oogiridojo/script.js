@@ -2,6 +2,22 @@ $(function(){
     var renda = 0;
     var jikoku = new Date;
     $(".free_vote_button").on('click',function(){
+        if($("input#voice_toggle").prop('checked')){
+            if(renda<19){
+                nowjikoku = new Date;
+                if(nowjikoku - jikoku > 5000){
+                    renda=0;
+                    jikoku = nowjikoku;
+                }
+                $("audio#sound-file1").get(0).currentTime = 0;
+                $("audio#sound-file1").get(0).play();
+                renda = renda+1;
+            }else{
+                $("audio#sound-file1").get(0).pause();
+                $("audio#sound-file2").get(0).play();
+                renda = 0;
+            }
+        }
         $.ajax({
             url:$(this).closest('form').attr('action'),
             type: 'post',
@@ -10,22 +26,6 @@ $(function(){
             context:$(this),
         }).done(function(newscore){
             $(this).prev("span").children("strong.free_vote_score").text(newscore["newscore"]);
-            if($("input#voice_toggle").prop('checked')){
-                if(renda<19){
-                    nowjikoku = new Date;
-                    if(nowjikoku - jikoku > 5000){
-                        renda=0;
-                        jikoku = nowjikoku;
-                    }
-                    $("audio#sound-file1").get(0).currentTime = 0;
-                    $("audio#sound-file1").get(0).play();
-                    renda = renda+1;
-                }else{
-                    $("audio#sound-file1").get(0).pause();
-                    $("audio#sound-file2").get(0).play();
-                    renda = 0;
-                }
-            }
         });
     });
 
