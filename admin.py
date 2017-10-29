@@ -13,3 +13,6 @@ admin.site.register(Tsukkomi)
 
 from .models import Judgement
 admin.site.register(Judgement)
+
+from django.contrib.sessions.models import Session
+admin.site.register(Session)
