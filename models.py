@@ -23,7 +23,7 @@ class Odai(models.Model):
 
 class Answer(models.Model):
     odai = models.ForeignKey(Odai, on_delete=models.CASCADE)
-    answer_text = models.CharField(max_length=200)
+    answer_text = models.CharField(max_length=300)
     creation_date = models.DateTimeField('date created', default=timezone.now)
     modified_date = models.DateTimeField('date modified', default=timezone.now)
     free_vote_score = models.PositiveIntegerField(default=0)
