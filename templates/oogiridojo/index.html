@@ -43,7 +43,7 @@
                                 <!-- tsukkomi form end -->
 
                                 <ul class="tsukkomi_list">
-                                {% for tsukkomi in answer.tsukkomi_set.all %}
+                                {% for tsukkomi in answer.tsukkomi_set.all|dictsort:"id" %}
                                     <li class="tsukkomi_text">
                                         {{ tsukkomi.tsukkomi_text }}
                                     </li>
