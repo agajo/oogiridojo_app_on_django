@@ -11,11 +11,11 @@ from django.utils import timezone
 
 from .models import Odai, Answer, Tsukkomi, Judgement
 
-class IndexView(generic.ListView):
+class IndexView(generic.DetailView):
     model = Odai
-    template_name = 'oogiridojo/index.html'
-    def get_queryset(self):
-        return Odai.objects.all().order_by('-id')[:1]
+    template_name = 'oogiridojo/odai_detail.html'
+    def get_object(self):
+        return Odai.objects.all().order_by('id').last()
 
 class OdaiView(generic.DetailView):
     model = Odai

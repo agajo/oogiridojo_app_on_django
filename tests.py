@@ -40,11 +40,9 @@ class IndexViewTests(TestCase):
         odai1 = Odai.objects.create(odai_text="test_odai_order1")
         odai2 = Odai.objects.create(odai_text="test_odai_order2")
         response = self.client.get(reverse('oogiridojo:index'))
-        self.assertQuerysetEqual(response.context['odai_list'],['<Odai: test_odai_order2>'])
-
-    def test_no_odai(self):
-        response = self.client.get(reverse('oogiridojo:index'))
-        self.assertContains(response,"お題がありません")
+        self.assertContains(response,"test_odai_order2</h2>")
+        self.assertNotContains(response,"test_odai_order1</h2>")
+        #お題一覧にどうせ両方含まれるので、コンテンツ内の<h2>の方でチェック
 
 class OdaiViewAnswersTests(TestCase):
     def test_no_answers(self):
