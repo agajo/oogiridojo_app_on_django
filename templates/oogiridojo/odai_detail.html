@@ -9,7 +9,6 @@
 {% endblock %}
 
 {% block main_content %}
-<div class="container">
     <section id="odai{{ forloop.counter }}" class="odai_section">
         <h2 class="odai_text">{{ odai.odai_text }}</h2>
             <form id="answer_form" action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
@@ -78,5 +77,4 @@
         </form>
     </section>
 
-</div><!-- end of container -->
 {% endblock main_content %}
