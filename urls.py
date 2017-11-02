@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^tsukkomi_submit/$', views.tsukkomi_submit, name='tsukkomi_submit'),
     url(r'^judgement_submit/$', views.judgement_submit, name='judgement_submit'),
     url(r'^voice_toggle/$', views.voice_toggle, name='voice_toggle'),
+    url(r'^judger/$', views.JudgerView.as_view(), name='judger'),
 ]

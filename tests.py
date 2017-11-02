@@ -143,7 +143,7 @@ class JudgementViewTests(TestCase):
         c = Client()
         result = c.login(username="judger",password="hoge")
         response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
-        self.assertEquals(response.status_code,200)
+        self.assertEqual(response.status_code,200)
 
     def test_show_answer_when_not_judged(self):
         odai = Odai.objects.create(odai_text="ジャッジなし")
@@ -154,7 +154,7 @@ class JudgementViewTests(TestCase):
         c = Client()
         c.login(username="judger", password="hoge")
         response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
-        self.assertEquals(response.status_code,200)
+        self.assertEqual(response.status_code,200)
         self.assertContains(response,"あご")
         self.assertContains(response, "judgement_form")
         # formが表示されることを、formのclassの名前でチェックしてます。
@@ -169,7 +169,7 @@ class JudgementViewTests(TestCase):
         c = Client()
         c.login(username="judger", password="hoge")
         response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
-        self.assertEquals(response.status_code,200)
+        self.assertEqual(response.status_code,200)
         self.assertNotContains(response,"あご")
         self.assertNotContains(response,"1点。")
         self.assertNotContains(response,"いいね")
@@ -203,13 +203,43 @@ class AudioSessionTests(TestCase):
     def test_toggle_still_on_when_visited_again(self):
         c = Client()
         response = c.post(reverse("oogiridojo:voice_toggle"),{'voice_toggle':'true'})
-        self.assertEquals(response.content,b'true')
+        self.assertEqual(response.content,b'true')
         response2 = c.get(reverse("oogiridojo:index"))
         self.assertContains(response2,'<input type="checkbox" id="voice_toggle" formaction="/oogiridojo/voice_toggle/" checked>')
         
     def test_toggle_still_off_when_visited_again(self):
         c = Client()
         response = c.post(reverse("oogiridojo:voice_toggle"),{'voice_toggle':'false'})
-        self.assertEquals(response.content,b'false')
+        self.assertEqual(response.content,b'false')
         response2 = c.get(reverse("oogiridojo:index"))
         self.assertContains(response2,'<input type="checkbox" id="voice_toggle" formaction="/oogiridojo/voice_toggle/" >')
+
+class JudgerViewTests(TestCase):
+    def test_no_permission(self):
+        response = self.client.get(reverse('oogiridojo:judger'))
+        # パーミッションがない場合はログインページに飛ばされる。
+        self.assertRedirects(response, reverse('accounts:login')+"?next=/oogiridojo/judger/")
+        # nextパラメータが付くので注意
+
+    def test_show_judge_ratio(self):
+        odai = Odai.objects.create(odai_text="ジャッジあり2")
+        answer1 = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        answer2 = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        answer3 = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        answer4 = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        answer5 = Answer.objects.create(answer_text="あご", odai_id = odai.id)
+        Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer1.id)
+        Judgement.objects.create(judgement_score=2, judgement_text="いいね", answer_id=answer2.id)
+        Judgement.objects.create(judgement_score=2, judgement_text="いいね", answer_id=answer3.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="いいね", answer_id=answer4.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="いいね", answer_id=answer5.id)
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:judger'))
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['ratio1'],20.0)
+        self.assertEqual(response.context['ratio2'],40.0)
+        self.assertEqual(response.context['ratio3'],40.0)

@@ -27,6 +27,29 @@ class JudgementView(PermissionRequiredMixin, generic.DetailView):
     model = Odai
     template_name = 'oogiridojo/judgement.html'
 
+class JudgerView(PermissionRequiredMixin, generic.TemplateView):
+    permission_required = 'oogiridojo.add_judgement'
+    template_name = 'oogiridojo/judger.html'
+    def get_context_data(self, **kwargs):
+        countall = Judgement.objects.count()
+        count1 = Judgement.objects.filter(judgement_score=1).count()
+        count2 = Judgement.objects.filter(judgement_score=2).count()
+        count3 = Judgement.objects.filter(judgement_score=3).count()
+        ratio1 = count1/countall
+        ratio2 = count2/countall
+        ratio3 = count3/countall
+        context = super(JudgerView, self).get_context_data(**kwargs)
+        context.update({"countall":countall,
+                        "count1":count1,
+                        "count2":count2,
+                        "count3":count3,
+                        "ratio1":ratio1*100,
+                        "ratio2":ratio2*100,
+                        "ratio3":ratio3*100,
+        })
+        return context
+
+
 def answer_submit(request):
     answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'])
     answer.save()

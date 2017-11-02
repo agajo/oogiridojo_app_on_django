@@ -1,0 +1,11 @@
+{% extends "oogiridojo/base.html" %}
+
+{% block main_content %}
+
+<p>ジャッジ数：{{ countall }}</p>
+<p><font color="green">１点：{{ count1 }}：{{ ratio1|floatformat }}％</font>  →25%</p>
+<p><font color="gold">２点：{{ count2 }}：{{ ratio2|floatformat }}％</font>  →65%</p>
+<p><font color="red">３点：{{ count3 }}：{{ ratio3|floatformat }}％</font>  →10%</p>
+
+
+{% endblock main_content %}
