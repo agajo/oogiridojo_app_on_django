@@ -11,13 +11,14 @@
 
     <link rel="stylesheet" href="{% static 'oogiridojo/style.css' %}">
     <link rel="stylesheet" href="{% static 'oogiridojo/toggle_switch.css' %}">
+    {% block other_styles %}{% endblock %}
     <title>{% block page_title %}岡竜之介の大喜利道場{% endblock %}</title>
 </head>
 <body>
 
 
 <header class="navbar navbar-expand-sm navbar-light bg-light">
-    <h1 id="site_name" class="navbar-brand">岡竜之介の大喜利道場</h1>
+    <span id="site_name" class="navbar-brand">岡竜之介の大喜利道場</span>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -37,18 +38,21 @@
                 </div>
             </li>
             <li class="nav-item">
-            <form>
-                {% csrf_token %}
-                <span class="nav-link">
-                    <label>
-                        <label class="switch">
-                            <input type="checkbox" id="voice_toggle" formaction="{% url 'oogiridojo:voice_toggle' %}" {% if voice_toggle %}checked{% endif %}>
-                            <span class="slider round"></span>
+                <a class="nav-link" href="{% url 'oogiridojo:yoi_ranking' %}">最近の良い回答ランキング</a>
+            </li>
+            <li class="nav-item">
+                <form>
+                    {% csrf_token %}
+                    <span class="nav-link">
+                        <label>
+                            <label class="switch">
+                                <input type="checkbox" id="voice_toggle" formaction="{% url 'oogiridojo:voice_toggle' %}" {% if voice_toggle %}checked{% endif %}>
+                                <span class="slider round"></span>
+                            </label>
+                            <span id="switch_text">音を鳴らす</span>
                         </label>
-                        <span id="switch_text">音を鳴らす</span>
-                    </label>
-                </span>
-            </form>
+                    </span>
+                </form>
             </li>
         </ul>
     </div>

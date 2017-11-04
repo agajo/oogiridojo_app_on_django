@@ -8,9 +8,9 @@ from django.contrib.auth.models import User, Permission
 class OdaiModelTests(TestCase):
     def test_answer_list_order(self):
         odai = Odai.objects.create(id = 1, odai_text="test_answer_list_order")
-        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03")
-        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:03")
-        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03+09:00")
+        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:03+09:00")
+        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03+09:00")
         ans2.answer_text="ans2_2"
         #ポスグレだと、この操作をすることで、取り出される順番が変わることがある。それが発生していないかチェックしている。
         ans2.save()
@@ -19,9 +19,9 @@ class OdaiModelTests(TestCase):
 
     def test_answer_list_order_with_modified_date(self):
         odai = Odai.objects.create(id = 1, odai_text="answer_list_order_with_modified_date")
-        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03")
-        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:04")
-        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03+09:00")
+        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:04+09:00")
+        ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03+09:00")
         self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans3>', '<Answer: ans2>','<Answer: ans1>'])
         #modified dateは無視して新しい順に。
 
@@ -40,9 +40,9 @@ class IndexViewTests(TestCase):
         odai1 = Odai.objects.create(odai_text="test_odai_order1")
         odai2 = Odai.objects.create(odai_text="test_odai_order2")
         response = self.client.get(reverse('oogiridojo:index'))
-        self.assertContains(response,"test_odai_order2</h2>")
-        self.assertNotContains(response,"test_odai_order1</h2>")
-        #お題一覧にどうせ両方含まれるので、コンテンツ内の<h2>の方でチェック
+        self.assertContains(response,"test_odai_order2</h1>")
+        self.assertNotContains(response,"test_odai_order1</h1>")
+        #お題一覧にどうせ両方含まれるので、コンテンツ内の<h1>の方でチェック
 
 class OdaiViewAnswersTests(TestCase):
     def test_no_answers(self):
@@ -84,9 +84,9 @@ class OdaiViewAnswersTests(TestCase):
 
     def test_tsukkomi_submit_and_modify_answer_date(self):
         odai = Odai.objects.create(odai_text="oda")
-        answer1 = Answer.objects.create(answer_text="ans1", odai_id = odai.id, modified_date="2017-01-01T01:01:01")
-        answer2 = Answer.objects.create(answer_text="ans2", odai_id = odai.id, modified_date="2017-01-01T01:01:01")
-        answer3 = Answer.objects.create(answer_text="ans3", odai_id = odai.id, modified_date="2017-01-01T01:01:01")
+        answer1 = Answer.objects.create(answer_text="ans1", odai_id = odai.id, modified_date="2017-01-01T01:01:01+09:00")
+        answer2 = Answer.objects.create(answer_text="ans2", odai_id = odai.id, modified_date="2017-01-01T01:01:01+09:00")
+        answer3 = Answer.objects.create(answer_text="ans3", odai_id = odai.id, modified_date="2017-01-01T01:01:01+09:00")
         response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer2.id, 'tsukkomi_text':"つっこみ"})
         self.assertQuerysetEqual(odai.answer_list(),['<Answer: ans3>', '<Answer: ans2>','<Answer: ans1>'])
 
@@ -243,3 +243,18 @@ class JudgerViewTests(TestCase):
         self.assertEqual(response.context['ratio1'],20.0)
         self.assertEqual(response.context['ratio2'],40.0)
         self.assertEqual(response.context['ratio3'],40.0)
+
+class YoiRankingViewTests(TestCase):
+    def test_ranking_context(self):
+        odai = Odai.objects.create(odai_text="良いランキングのテスト")
+        answer1 = Answer.objects.create(answer_text="uu", free_vote_score=1, odai_id = odai.id)
+        answer2 = Answer.objects.create(answer_text="iiii", free_vote_score=2, odai_id = odai.id)
+        response = self.client.get(reverse('oogiridojo:yoi_ranking'))
+        self.assertQuerysetEqual(response.context['answer_list'],['<Answer: iiii>', '<Answer: uu>'])
+
+    def test_ranking_not_show_old_answer(self):
+        odai = Odai.objects.create(odai_text="良いランキングのテスト")
+        answer1 = Answer.objects.create(answer_text="uu", free_vote_score=5, odai_id = odai.id, creation_date="2000-10-10T11:11:11+09:00")
+        answer2 = Answer.objects.create(answer_text="iiii", free_vote_score=2, odai_id = odai.id)
+        response = self.client.get(reverse('oogiridojo:yoi_ranking'))
+        self.assertQuerysetEqual(response.context['answer_list'],['<Answer: iiii>'])

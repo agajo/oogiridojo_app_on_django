@@ -6,6 +6,7 @@ from django.views import generic
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils import timezone
+import datetime
 
 # Create your views here.
 
@@ -49,6 +50,17 @@ class JudgerView(PermissionRequiredMixin, generic.TemplateView):
         })
         return context
 
+class YoiView(generic.ListView):
+    model = Answer
+    template_name = "oogiridojo/yoi_ranking.html"
+    def get_queryset(self):
+        return Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=7)).order_by('-free_vote_score')[:30]
+
+class GreatView(generic.ListView):
+    model = Judgement
+    template_name = "oogiridojo/great_answers.html"
+    def get_queryset(self):
+        return Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:30]
 
 def answer_submit(request):
     answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'])

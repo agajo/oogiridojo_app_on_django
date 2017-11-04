@@ -1,0 +1,7 @@
+{% extends "oogiridojo/base.html" %}
+
+{% block main_content %}
+    {% for judge in judgement_list %}
+        <p>{{ judge.answer.answer_text }} -- {{ judge.judgement_score }}</p>
+    {% endfor %}
+{% endblock main_content %}

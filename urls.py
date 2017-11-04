@@ -13,4 +13,6 @@ urlpatterns = [
     url(r'^judgement_submit/$', views.judgement_submit, name='judgement_submit'),
     url(r'^voice_toggle/$', views.voice_toggle, name='voice_toggle'),
     url(r'^judger/$', views.JudgerView.as_view(), name='judger'),
+    url(r'^yoi_ranking/$', views.YoiView.as_view(), name='yoi_ranking'),
+#    url(r'^great_answers/$', views.GreatView.as_view(), name='great_answers'),
 ]

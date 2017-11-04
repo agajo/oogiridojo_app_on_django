@@ -1,33 +1,25 @@
 {% extends "oogiridojo/base.html" %}
 
-{% block page_title %}{{ odai.odai_text }} -- 岡竜之介の大喜利道場{% endblock %}
+{% load static %}
 
-{% block judgement_link %}
-    {% if perms.oogiridojo.add_judgement %}
-        <a class="nav-link" href="{% url 'oogiridojo:judgement' odai.id %}">ジャッジ</a>
-    {% endif %}
+{% block other_styles %}
+    <link rel="stylesheet" href="{% static 'oogiridojo/ranking_style.css' %}">
 {% endblock %}
 
 {% block main_content %}
-    <section id="odai" class="odai_section">
-        <h1 class="odai_text">{{ odai.odai_text }}</h1>
-            <form id="answer_form" action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
-                {% csrf_token %}
-
-                <div class="row"><!-- .row from here -->
-                <input type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
-                <input type="submit" class="answer_submit_button col-4 btn btn-danger btn-sm" value="回答を投稿する">
-                </div><!-- end of .row -->
-
-                <input type="hidden" name="odai_id" value = {{ odai.id }}>
-            </form>
+<p><h1 id="ranking_title">最近の良い回答ランキング</h1></p>
         <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
             {% csrf_token %}
             <ul class="answer_list list-group">
-                {% for answer in odai.answer_list %}
-                {# ここでodai.answer_list.reverseとして逆順にすると、何故かis_number_oneが全部消えちゃう #}
-                    <li id="answer_id_{{ answer.id }}" class="answer_text list-group-item">
-                        <div>{{ answer.answer_text }}</div>
+                {% for answer in answer_list %}
+                    <li class="answer_text list-group-item">
+                        <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>
+                        <a href="{% url 'oogiridojo:odai' answer.odai.id %}">
+                            <h4 class="odai_text">{{ answer.odai.odai_text }}</h4>
+                        </a>
+                        <a href="{% url 'oogiridojo:odai' answer.odai.id %}#answer_id_{{ answer.id }}">
+                            <div class="ranking_answer_text">{{ answer.answer_text }}</div>
+                        </a>
                         <div class="answer_buttons">
                             <span {% if answer.is_number_one %}class="number_one_indicator"{% endif %}>
                                 {% if answer.is_number_one %}
@@ -73,6 +65,4 @@
                 {% endfor %}
             </ul>
         </form>
-    </section>
-
 {% endblock main_content %}
