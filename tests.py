@@ -258,3 +258,18 @@ class YoiRankingViewTests(TestCase):
         answer2 = Answer.objects.create(answer_text="iiii", free_vote_score=2, odai_id = odai.id)
         response = self.client.get(reverse('oogiridojo:yoi_ranking'))
         self.assertQuerysetEqual(response.context['answer_list'],['<Answer: iiii>'])
+
+class GreatAnswersViewTests(TestCase):
+    def test_ranking_context(self):
+        odai = Odai.objects.create(odai_text="great answer test")
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id)
+        answer2 = Answer.objects.create(answer_text="ww", odai_id = odai.id)
+        answer3 = Answer.objects.create(answer_text="ii", odai_id = odai.id)
+        answer4 = Answer.objects.create(answer_text="iiiiii", odai_id = odai.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer1.id)
+        Judgement.objects.create(judgement_score=1, judgement_text="www", answer_id=answer2.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="iii", answer_id=answer3.id)
+        Judgement.objects.create(judgement_score=2, judgement_text="gagagaiii", answer_id=answer4.id)
+        response = self.client.get(reverse('oogiridojo:great_answers'))
+        self.assertQuerysetEqual(response.context['judgement_list'],['<Judgement: iii>', '<Judgement: uuu>'])
+        #新しい順に出ること、ランク3だけが出ること、をチェックしてます。

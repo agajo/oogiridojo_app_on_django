@@ -18,7 +18,7 @@
 
 
 <header class="navbar navbar-expand-sm navbar-light bg-light">
-    <span id="site_name" class="navbar-brand">岡竜之介の大喜利道場</span>
+    <a href="{% url 'oogiridojo:index' %}"><span id="site_name" class="navbar-brand">岡竜之介の大喜利道場</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -36,6 +36,9 @@
                         <a class="dropdown-item" href="{% url 'oogiridojo:odai' odai.id %}">{{ odai.odai_text }}</a>
                     {% endfor %}
                 </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'oogiridojo:great_answers' %}">最近の３点回答</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'oogiridojo:yoi_ranking' %}">最近の良い回答ランキング</a>
