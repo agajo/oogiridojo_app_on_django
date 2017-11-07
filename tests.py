@@ -43,6 +43,7 @@ class IndexViewTests(TestCase):
         self.assertContains(response,"test_odai_order2</h1>")
         self.assertNotContains(response,"test_odai_order1</h1>")
         #お題一覧にどうせ両方含まれるので、コンテンツ内の<h1>の方でチェック
+        self.assertContains(response,"<title>岡竜之介の大喜利道場</title>")
 
 class OdaiViewAnswersTests(TestCase):
     def test_no_answers(self):

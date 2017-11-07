@@ -14,7 +14,7 @@ from .models import Odai, Answer, Tsukkomi, Judgement
 
 class IndexView(generic.DetailView):
     model = Odai
-    template_name = 'oogiridojo/odai_detail.html'
+    template_name = 'oogiridojo/index.html'
     def get_object(self):
         return Odai.objects.all().order_by('id').last()
 
