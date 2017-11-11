@@ -16,3 +16,6 @@ admin.site.register(Judgement)
 
 from django.contrib.sessions.models import Session
 admin.site.register(Session)
+
+from .models import Monkasei
+admin.site.register(Monkasei)

@@ -15,4 +15,6 @@ urlpatterns = [
     url(r'^judger/$', views.JudgerView.as_view(), name='judger'),
     url(r'^yoi_ranking/$', views.YoiView.as_view(), name='yoi_ranking'),
     url(r'^great_answers/$', views.GreatView.as_view(), name='great_answers'),
+    url(r'^mypage/$', views.MypageView.as_view(), name='mypage'),
 ]
+

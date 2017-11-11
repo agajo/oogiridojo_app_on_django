@@ -1,0 +1,71 @@
+{% extends "oogiridojo/base.html" %}
+
+{% load static %}
+
+{% block page_title %}マイページ--岡竜之介の大喜利道場{% endblock %}
+
+{% block other_metas %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block other_styles %}
+    <link rel="stylesheet" href="{% static 'oogiridojo/ranking_style.css' %}">
+{% endblock %}
+
+{% block main_content %}
+<p><h1 id="ranking_title">マイページ</h1></p>
+        <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
+            {% csrf_token %}
+            <ul class="answer_list list-group">
+                {% for answer in answer_list %}
+                    <li class="answer_text list-group-item">
+                        <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>
+                        <a href="{% url 'oogiridojo:odai' answer.odai.id %}">
+                            <h4 class="odai_text">{{ answer.odai.odai_text }}</h4>
+                        </a>
+                        <a href="{% url 'oogiridojo:odai' answer.odai.id %}#answer_id_{{ answer.id }}">
+                            <div class="ranking_answer_text">{{ answer.answer_text }}</div>
+                        </a>
+                        <div class="answer_buttons">
+                            <span {% if answer.is_number_one %}class="number_one_indicator"{% endif %}>
+                                {% if answer.is_number_one %}
+                                    <strong>１位！</strong>
+                                {% endif %}
+                                <strong class="free_vote_score">{{ answer.free_vote_score }}</strong>
+                            </span>
+                            <button type='button' class="open_tsukkomi_form_button btn btn-outline-danger btn-sm" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">ツッコむ</button>
+                        </div>
+
+                        <!-- tsukkomi form from here. default collapsed. -->
+                        <div id="tsukkomi_form_{{ answer.id }}" class="collapse">
+                            <input type="text" name="tsukkomi_text" class="form-control">
+                            <button type='button' class = "tsukkomi_submit_button btn btn-danger btn-sm" name="tsukkomi_submit_button" formaction="{% url 'oogiridojo:tsukkomi_submit' %}" value="{{ answer.id }}" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">投稿する</button>
+                        </div>
+                        <!-- tsukkomi form end -->
+
+                        <ul class="tsukkomi_list">
+                        {% for tsukkomi in answer.tsukkomi_set.all|dictsort:"id" %}
+                            <li class="tsukkomi_text">
+                                {{ tsukkomi.tsukkomi_text }}
+                            </li>
+                        {% endfor %}
+                        </ul>
+
+                        <!-- 評価を表示します -->
+                        {% if answer.judgement_set.all %}
+                            {% for judgement in answer.judgement_set.all %}
+                                <span class="judgement_rank judgement_rank_{{ judgement.judgement_score }}">
+                                    {{ judgement.judgement_score }}点。
+                                </span>
+                                <span class="judgement_text">
+                                    {{ judgement.judgement_text }}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                        <!-- 評価ここまで -->
+
+                    </li>
+                {% empty %}
+                    <li>回答がありません。</li>
+                {% endfor %}
+            </ul>
+        </form>
+{% endblock main_content %}

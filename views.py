@@ -10,7 +10,7 @@ import datetime
 
 # Create your views here.
 
-from .models import Odai, Answer, Tsukkomi, Judgement
+from .models import Odai, Answer, Tsukkomi, Judgement, Monkasei
 
 class IndexView(generic.DetailView):
     model = Odai
@@ -63,9 +63,17 @@ class GreatView(generic.ListView):
         return Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:30]
 
 def answer_submit(request):
-    answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'])
+    if(monkasei_id = request.get_signed_cookie('monkasei_id')):
+        pass
+    else:
+        monkasei = Monkasei(name = rname())
+        monkasei.save()
+        monkasei_id = monkasei.id
+    answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei_id)
     answer.save()
-    return HttpResponseRedirect(reverse('oogiridojo:odai',kwargs={'pk':request.POST['odai_id']}))
+    response = HttpResponseRedirect(reverse('oogiridojo:odai',kwargs={'pk':request.POST['odai_id']}))
+    response.set_signed_cookie('monkasei_id', monkasei_id, max_age = 94610000)
+    return response
 
 def free_vote(request):
     answer = Answer.objects.get(pk = request.POST['free_vote_button'])
@@ -91,3 +99,9 @@ def voice_toggle(request):
     request.session['voice_toggle'] = request.POST['voice_toggle']
     request.session.set_expiry(2628000)#有効期限一ヶ月にしてみる。
     return HttpResponse(request.session['voice_toggle'])
+
+class MypageView(generic.ListView):
+    model = Answer
+    template_name = "oogiridojo/mypage.html"
+    def get_queryset(self):
+        return Answer.objects.filter(monkasei_id__exact = request.get_signed_cookie('monkasei_id')).order_by('-id')
