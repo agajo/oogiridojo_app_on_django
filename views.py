@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils import timezone
 import datetime
+from .functions import rname
 
 # Create your views here.
 
@@ -63,8 +64,8 @@ class GreatView(generic.ListView):
         return Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:30]
 
 def answer_submit(request):
-    if(monkasei_id = request.get_signed_cookie('monkasei_id')):
-        pass
+    if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
+        monkasei_id = request.get_signed_cookie('monkasei_id')
     else:
         monkasei = Monkasei(name = rname())
         monkasei.save()
@@ -104,4 +105,7 @@ class MypageView(generic.ListView):
     model = Answer
     template_name = "oogiridojo/mypage.html"
     def get_queryset(self):
-        return Answer.objects.filter(monkasei_id__exact = request.get_signed_cookie('monkasei_id')).order_by('-id')
+        if(self.request.get_signed_cookie('monkasei_id',False)):#キーがない場合はエラーの代わりにFalseを返す。便利ね。
+            return Answer.objects.filter(monkasei_id__exact = self.request.get_signed_cookie('monkasei_id')).order_by('-id')
+        else:
+            return []

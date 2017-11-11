@@ -21,6 +21,12 @@ class Odai(models.Model):
                 answer.is_number_one = False
         return anslist
 
+class Monkasei(models.Model):
+    name = models.CharField(max_length=30)
+    creation_date = models.DateTimeField('date created', default=timezone.now)
+    def __str__(self):
+        return self.name
+
 class Answer(models.Model):
     odai = models.ForeignKey(Odai, on_delete=models.CASCADE)
     monkasei = models.ForeignKey(Monkasei, on_delete=models.CASCADE)
@@ -45,9 +51,3 @@ class Judgement(models.Model):
     creation_date = models.DateTimeField('date created', default=timezone.now)
     def __str__(self):
         return self.judgement_text
-
-class Monkasei(models.Model):
-    name = models.CharField(max_length=30)
-    creation_date = models.DateTimeField('date created', default=timezone.now)
-    def __str__(self):
-        return self.name
