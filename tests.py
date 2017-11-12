@@ -1,5 +1,5 @@
 from django.test import TestCase, Client
-from .models import Odai, Answer, Tsukkomi, Judgement
+from .models import Odai, Answer, Tsukkomi, Judgement, Monkasei
 from django.urls import reverse
 from django.contrib.auth.models import User, Permission
 
@@ -8,6 +8,7 @@ from django.contrib.auth.models import User, Permission
 class OdaiModelTests(TestCase):
     def test_answer_list_order(self):
         odai = Odai.objects.create(id = 1, odai_text="test_answer_list_order")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03+09:00", monkasei_id=1)
         ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:03+09:00", monkasei_id=1)
         ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03+09:00", monkasei_id=1)
@@ -19,6 +20,7 @@ class OdaiModelTests(TestCase):
 
     def test_answer_list_order_with_modified_date(self):
         odai = Odai.objects.create(id = 1, odai_text="answer_list_order_with_modified_date")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, modified_date="2017-01-01T01:01:03+09:00", monkasei_id=1)
         ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, modified_date="2017-01-01T01:01:04+09:00", monkasei_id=1)
         ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, modified_date="2017-01-01T01:01:03+09:00", monkasei_id=1)
@@ -27,6 +29,7 @@ class OdaiModelTests(TestCase):
 
     def test_number_one_answer(self):
         odai = Odai.objects.create(id=1, odai_text="test_number_one_answer")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, free_vote_score=1, monkasei_id=1)
         ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, free_vote_score=300, monkasei_id=1)
         ans3 = Answer.objects.create(answer_text="ans3", odai_id=1, free_vote_score=50, monkasei_id=1)
@@ -54,18 +57,21 @@ class OdaiViewAnswersTests(TestCase):
 
     def test_an_answer(self):
         odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         Answer.objects.create(answer_text="ほげほげ", odai_id = odai.id, monkasei_id=1)
         response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response,"ほげほげ")
 
     def test_an_answer_with_free_vote_score(self):
         odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id, monkasei_id=1)
         response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response,'<strong class="free_vote_score">1</strong>')
 
     def test_an_answer_with_tsukkomi(self):
         odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="ふが", odai_id = odai.id, monkasei_id=1)
         tsukkomi = Tsukkomi.objects.create(tsukkomi_text="つっこみます", answer_id=answer.id)
         response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
@@ -73,18 +79,21 @@ class OdaiViewAnswersTests(TestCase):
 
     def test_free_vote_score_increment(self):
         odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id, monkasei_id=1)
         response = self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
         self.assertEqual(response.json()["newscore"], 2)
 
     def test_tsukkomi_submit(self):
         odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id, monkasei_id=1)
         response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer.id, 'tsukkomi_text':"つっこみ"})
         self.assertEqual(response.json()["return_tsukkomi"],"つっこみ")
 
     def test_tsukkomi_submit_and_modify_answer_date(self):
         odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer1 = Answer.objects.create(answer_text="ans1", odai_id = odai.id, modified_date="2017-01-01T01:01:01+09:00", monkasei_id=1)
         answer2 = Answer.objects.create(answer_text="ans2", odai_id = odai.id, modified_date="2017-01-01T01:01:01+09:00", monkasei_id=1)
         answer3 = Answer.objects.create(answer_text="ans3", odai_id = odai.id, modified_date="2017-01-01T01:01:01+09:00", monkasei_id=1)
@@ -103,6 +112,7 @@ class OdaiViewAnswersTests(TestCase):
 
     def test_show_judgement(self):
         odai = Odai.objects.create(odai_text="ジャッジあり")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
         judgement = Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer.id)
         response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
@@ -148,6 +158,7 @@ class JudgementViewTests(TestCase):
 
     def test_show_answer_when_not_judged(self):
         odai = Odai.objects.create(odai_text="ジャッジなし")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
         user = User.objects.create_user("judger", password="hoge")
         permission = Permission.objects.get(codename='add_judgement')
@@ -162,6 +173,7 @@ class JudgementViewTests(TestCase):
 
     def test_not_show_answer_when_judged(self):
         odai = Odai.objects.create(odai_text="ジャッジあり2")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
         judgement = Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer.id)
         user = User.objects.create_user("judger", password="hoge")
@@ -179,6 +191,7 @@ class JudgementViewTests(TestCase):
 
     def test_add_judgement_no_permission(self):
         odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
         response = self.client.post(reverse("oogiridojo:judgement_submit"), {'answer_id':answer.id, 'judgement_text':"だめくそ", 'judgement_score':1})
         # パーミッションがない場合はログインページに飛ばされる。
@@ -186,6 +199,7 @@ class JudgementViewTests(TestCase):
 
     def test_add_judgement_with_permission(self):
         odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
         user = User.objects.create_user("judger", password="hoge")
         permission = Permission.objects.get(codename='add_judgement')
@@ -224,6 +238,7 @@ class JudgerViewTests(TestCase):
 
     def test_show_judge_ratio(self):
         odai = Odai.objects.create(odai_text="ジャッジあり2")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer1 = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
         answer2 = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
         answer3 = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
@@ -248,6 +263,7 @@ class JudgerViewTests(TestCase):
 class YoiRankingViewTests(TestCase):
     def test_ranking_context(self):
         odai = Odai.objects.create(odai_text="良いランキングのテスト")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer1 = Answer.objects.create(answer_text="uu", free_vote_score=1, odai_id = odai.id, monkasei_id=1)
         answer2 = Answer.objects.create(answer_text="iiii", free_vote_score=2, odai_id = odai.id, monkasei_id=1)
         response = self.client.get(reverse('oogiridojo:yoi_ranking'))
@@ -255,6 +271,7 @@ class YoiRankingViewTests(TestCase):
 
     def test_ranking_not_show_old_answer(self):
         odai = Odai.objects.create(odai_text="良いランキングのテスト")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer1 = Answer.objects.create(answer_text="uu", free_vote_score=5, odai_id = odai.id, creation_date="2000-10-10T11:11:11+09:00", monkasei_id=1)
         answer2 = Answer.objects.create(answer_text="iiii", free_vote_score=2, odai_id = odai.id, monkasei_id=1)
         response = self.client.get(reverse('oogiridojo:yoi_ranking'))
@@ -263,6 +280,7 @@ class YoiRankingViewTests(TestCase):
 class GreatAnswersViewTests(TestCase):
     def test_ranking_context(self):
         odai = Odai.objects.create(odai_text="great answer test")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
         answer2 = Answer.objects.create(answer_text="ww", odai_id = odai.id, monkasei_id=1)
         answer3 = Answer.objects.create(answer_text="ii", odai_id = odai.id, monkasei_id=1)
