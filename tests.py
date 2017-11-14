@@ -1,5 +1,5 @@
 from django.test import TestCase, Client
-from .models import Odai, Answer, Tsukkomi, Judgement, Monkasei
+from .models import Odai, Answer, Tsukkomi, Judgement, Monkasei, Article, Practice
 from django.urls import reverse
 from django.contrib.auth.models import User, Permission
 
@@ -307,3 +307,43 @@ class MypageViewTests(TestCase):
         self.assertContains(response,"uuuuuu")
         self.assertNotContains(response,"iiiiii")
         self.assertNotContains(response,"eeeeee")
+        #該当する本人の回答だけ表示されるかテスト
+
+#以下、大喜利の「型」がらみのテストです。本当は分割したいけどやり方がわからんので。
+#いつかわかったら分割しておいて。2017-11-14
+
+class ArticleModelTests(TestCase):
+    def test_next_prev(self):
+        article1 = Article.objects.create(title="aaaaa", content="bbbbb", practice_odai="ccccc")
+        article2 = Article.objects.create(title="aaaa2", content="bbbb2", practice_odai="cccc2")
+        self.assertFalse(article1.get_prev())
+        self.assertFalse(article2.get_next())
+        self.assertEqual(article1.get_next().title,"aaaa2")
+        self.assertEqual(article2.get_prev().title,"aaaaa")
+
+class ArticleListViewTests(TestCase):
+    def test_article_list_context(self):
+        article1 = Article.objects.create(title="aaaaa", content="bbbbb", practice_odai="ccccc")
+        article2 = Article.objects.create(title="aaaa2", content="bbbb2", practice_odai="cccc2")
+        response = self.client.get(reverse('oogiridojo:article_list'))
+        self.assertQuerysetEqual(response.context['article_list'],['<Article: aaaaa>', '<Article: aaaa2>'])
+
+class ArticleViewTests(TestCase):
+    def test_article_content(self):
+        article = Article.objects.create(title="aaaaa", content="bbbbb", practice_odai="ccccc")
+        response = self.client.get(reverse('oogiridojo:article', kwargs={'pk':article.id}))
+        self.assertContains(response,"aaaaa")
+        self.assertContains(response,"bbbbb")
+        self.assertContains(response,"ccccc")
+
+    def test_article_practice_answers(self):
+        article = Article.objects.create(title="aaaaa", content="bbbbb", practice_odai="ccccc")
+        practice = Practice.objects.create(answer_text="ddddd", article_id=article.id)
+        response = self.client.get(reverse('oogiridojo:article', kwargs={'pk':article.id}))
+        self.assertContains(response,"ddddd")
+
+class PracticeSubmitViewTests(TestCase):
+    def test_practice_submit(self):
+        article = Article.objects.create(title="aaaaa", content="bbbbb", practice_odai="ccccc")
+        response = self.client.post(reverse("oogiridojo:practice_submit"), {'article_id':article.id, 'practice_text':"つっこみ"})
+        self.assertEqual(response.json()["return_practice"],"つっこみ")

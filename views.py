@@ -115,6 +115,8 @@ class ArticleView(generic.DetailView):
 
 class ArticleListView(generic.ListView):
     model = Article
+    def get_queryset(self):
+        return Article.objects.all().order_by('id')
 
 def practice_submit(request):
     practice = Practice(answer_text=request.POST['practice_text'], article_id=request.POST['article_id'])

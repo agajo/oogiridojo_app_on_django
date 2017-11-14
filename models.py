@@ -60,16 +60,16 @@ class Article(models.Model):
     def __str__(self):
         return self.title
     def get_next(self):
-        next = Article.objects.get(id=self.id+1)
-        if next:
+        try:
+            next = Article.objects.get(id=self.id+1)
             return next
-        else:
+        except Article.DoesNotExist:
             return False
     def get_prev(self):
-        prev = Article.objects.get(id=self.id-1)
-        if prev:
+        try:
+            prev = Article.objects.get(id=self.id-1)
             return prev
-        else:
+        except Article.DoesNotExist:
             return False
 
 class Practice(models.Model):
