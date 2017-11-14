@@ -1,13 +1,23 @@
 body{
     font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","游ゴシック Medium",YuGothic,YuGothicM,"Hiragino Kaku Gothic ProN",メイリオ,Meiryo,sans-serif;
 }
+h1{
+    font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
+    font-size:1.5rem;
+    color:#555;
+}
+h2{
+    font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
+    font-size:1.4rem;
+    color:#555;
+}
 .odai_text{
     font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
     font-size:1.5rem;
     color:#555;
 }
-section.odai_section{
-    margin-top:30px;
+.container{
+    margin-top:20px;
 }
 ul.answer_list{
     margin-top:2px;

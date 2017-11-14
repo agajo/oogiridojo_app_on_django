@@ -59,6 +59,18 @@ class Article(models.Model):
     creation_date = models.DateTimeField('date created', default=timezone.now)
     def __str__(self):
         return self.title
+    def get_next(self):
+        next = Article.objects.get(id=self.id+1)
+        if next:
+            return next
+        else:
+            return False
+    def get_prev(self):
+        prev = Article.objects.get(id=self.id-1)
+        if prev:
+            return prev
+        else:
+            return False
 
 class Practice(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)

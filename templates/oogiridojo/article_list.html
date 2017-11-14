@@ -5,8 +5,9 @@
 {% block page_title %}大喜利の「型」--岡竜之介の大喜利道場{% endblock %}
 
 {% block main_content %}
+<h1>大喜利の「型」</h1>
 <ul>
-    {% for article in article_list %}
+    {% for article in article_list|dictsort:"id" %}
         <li><a href="{% url 'oogiridojo:article' article.id %}">{{ article.title }}</a></li>
     {% endfor %}
 </ul>

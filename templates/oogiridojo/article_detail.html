@@ -4,29 +4,65 @@
 
 {% block page_title %}{{ article.title }}--岡竜之介の大喜利道場{% endblock %}
 
+{% block other_styles %}
+    <link rel="stylesheet" href="{% static 'oogiridojo/article_style.css' %}">
+{% endblock %}
+
 {% block main_content %}
 <h1>{{ article.title }} </h1>
     <article>
-     {{ article.content|linebreaks }}
+     {{ article.content|safe|linebreaks }}
     <address> Posted by 岡竜之介</address>
 </article>
 
-<section>
-    <h2>{{ article.practice_odai }}</h2>
-        <form id="answer_form" action = "{% url 'oogiridojo:practice_submit' %}" method = "post">
-            {% csrf_token %}
+<p>
+    {% if article.get_prev %}
+        <a href="{% url 'oogiridojo:article' article.get_prev.id %}">
+            &lt;&lt;&nbsp;{{ article.get_prev.title }}
+        </a>
+    {% endif %}|
+    <a href="{% url 'oogiridojo:article_list' %}">大喜利の「型」</a>|
+    {% if article.get_next %}
+        <a href="{% url 'oogiridojo:article' article.get_next.id %}">
+            {{ article.get_next.title }}&nbsp;&gt;&gt;
+        </a>
+    {% endif %}
+</p>
 
-            <div class="row"><!-- .row from here -->
-            <input type="text" name="answer_text" class="col-8 form-control" required>
-            <button type="button" class="answer_submit_button col-4 btn btn-danger btn-sm" value="回答を投稿する">
-            </div><!-- end of .row -->
-            <input type="hidden" name="odai_id" value = {{ article.id }}>
-        </form>
-    <ul>
-    {% for practice in article.practice_set.all|dictsortreversed:"id " %}
-        <li>{{ practice.answer_text }}</li>
+
+
+<section>
+    <h2 class="odai">お題：</h2>
+    <h2 class="odai">{{ article.practice_odai }}</h2>
+    <form id="answer_form" action = "{% url 'oogiridojo:practice_submit' %}" method = "post">
+        {% csrf_token %}
+        <div class="row"><!-- .row from here -->
+        <input type="text" name="answer_text" class="col-8 form-control" required>
+        <button type="button" class="practice_submit_button col-4 btn btn-danger btn-sm" value="{{ article.id }}">回答を投稿する</button>
+        </div><!-- end of .row -->
+    </form>
+    <ul class="practice_list answer_list list-group">
+    {% for practice in article.practice_set.all|dictsortreversed:"id"|slice:":50" %}
+        <li class="practice_text list-group-item">{{ practice.answer_text }}</li>
     {% endfor %}
     </ul>
 </section>
 
+<p>
+    {% if article.get_prev %}
+        <a href="{% url 'oogiridojo:article' article.get_prev.id %}">
+            &lt;&lt;&nbsp;{{ article.get_prev.title }}
+        </a>
+    {% endif %}|
+    <a href="{% url 'oogiridojo:article_list' %}">大喜利の「型」</a>|
+    {% if article.get_next %}
+        <a href="{% url 'oogiridojo:article' article.get_next.id %}">
+            {{ article.get_next.title }}&nbsp;&gt;&gt;
+        </a>
+    {% endif %}
+</p>
 {% endblock main_content %}
+
+{% block other_scripts %}
+    <script src="{% static 'oogiridojo/practice_script.js' %}"></script>
+{% endblock %}

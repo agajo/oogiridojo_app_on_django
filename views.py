@@ -117,6 +117,6 @@ class ArticleListView(generic.ListView):
     model = Article
 
 def practice_submit(request):
-    practice = Practice(answer_text=request.POST['answer_text'], article_id=request.POST['article_id'])
+    practice = Practice(answer_text=request.POST['practice_text'], article_id=request.POST['article_id'])
     practice.save()
-    return JsonResponse({"return_answer":practice.answer_text})
+    return JsonResponse({"return_practice":practice.answer_text})
