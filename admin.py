@@ -19,3 +19,9 @@ admin.site.register(Session)
 
 from .models import Monkasei
 admin.site.register(Monkasei)
+
+from .models import Article
+admin.site.register(Article)
+
+from .models import Practice
+admin.site.register(Practice)

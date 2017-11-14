@@ -1,0 +1,32 @@
+{% extends "oogiridojo/base.html" %}
+
+{% load static %}
+
+{% block page_title %}{{ article.title }}--岡竜之介の大喜利道場{% endblock %}
+
+{% block main_content %}
+<h1>{{ article.title }} </h1>
+    <article>
+     {{ article.content|linebreaks }}
+    <address> Posted by 岡竜之介</address>
+</article>
+
+<section>
+    <h2>{{ article.practice_odai }}</h2>
+        <form id="answer_form" action = "{% url 'oogiridojo:practice_submit' %}" method = "post">
+            {% csrf_token %}
+
+            <div class="row"><!-- .row from here -->
+            <input type="text" name="answer_text" class="col-8 form-control" required>
+            <button type="button" class="answer_submit_button col-4 btn btn-danger btn-sm" value="回答を投稿する">
+            </div><!-- end of .row -->
+            <input type="hidden" name="odai_id" value = {{ article.id }}>
+        </form>
+    <ul>
+    {% for practice in article.practice_set.all|dictsortreversed:"id " %}
+        <li>{{ practice.answer_text }}</li>
+    {% endfor %}
+    </ul>
+</section>
+
+{% endblock main_content %}

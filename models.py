@@ -51,3 +51,18 @@ class Judgement(models.Model):
     creation_date = models.DateTimeField('date created', default=timezone.now)
     def __str__(self):
         return self.judgement_text
+
+class Article(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    practice_odai = models.CharField(max_length=100)
+    creation_date = models.DateTimeField('date created', default=timezone.now)
+    def __str__(self):
+        return self.title
+
+class Practice(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    answer_text = models.CharField(max_length=300)
+    creation_date = models.DateTimeField('date created', default=timezone.now)
+    def __str__(self):
+        return self.answer_text

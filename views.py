@@ -11,7 +11,7 @@ from .functions import rname
 
 # Create your views here.
 
-from .models import Odai, Answer, Tsukkomi, Judgement, Monkasei
+from .models import Odai, Answer, Tsukkomi, Judgement, Monkasei, Article, Practice
 
 class IndexView(generic.DetailView):
     model = Odai
@@ -109,3 +109,14 @@ class MypageView(generic.ListView):
             return Answer.objects.filter(monkasei_id__exact = self.request.get_signed_cookie('monkasei_id')).order_by('-id')
         else:
             return []
+
+class ArticleView(generic.DetailView):
+    model = Article
+
+class ArticleListView(generic.ListView):
+    model = Article
+
+def practice_submit(request):
+    practice = Practice(answer_text=request.POST['answer_text'], article_id=request.POST['article_id'])
+    practice.save()
+    return JsonResponse({"return_answer":practice.answer_text})
