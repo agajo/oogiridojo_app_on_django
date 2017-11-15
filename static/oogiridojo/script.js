@@ -26,6 +26,7 @@ $(function(){
             context:$(this),
         }).done(function(newscore){
             $(this).prev("span").children("strong.free_vote_score").text(newscore["newscore"]);
+            ga('send', 'event', "free_vote", "free_vote");
         });
     });
 
@@ -41,6 +42,7 @@ $(function(){
             }).done(function(return_tsukkomi){
                 $(this).closest('div').next('ul.tsukkomi_list').append('<li class="tsukkomi_text">'+return_tsukkomi["return_tsukkomi"]);
                 $(this).prev("input").val("");
+                ga('send', 'event', "tsukkomi", "tsukkomi_submit");
             });
         }
     });
@@ -51,6 +53,7 @@ $(function(){
         var me = $(this);
         //下層のfunction内にまで同じthisを渡してくれないので、変数に格納しておきます。
         me.find("input.answer_submit_button").prop("disabled",true);
+        ga('send', 'event', "answer", "answer_submit");
         setTimeout(function(self){
             me.find("input.answer_submit_button").prop("disabled",false);
         }, 10000);
@@ -62,6 +65,7 @@ $(function(){
             type: 'post',
             data: 'csrfmiddlewaretoken='+$(this).closest('form').find("input[name='csrfmiddlewaretoken']").val()+'&voice_toggle='+$(this).prop('checked'),
         });
+        ga('send', 'event', "voice", "voice_toggle");
     });
 
 });
