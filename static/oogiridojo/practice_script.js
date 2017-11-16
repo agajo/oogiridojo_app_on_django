@@ -11,7 +11,7 @@ $(function(){
             }).done(function(return_practice){
                 $(this).parent().parent().next('ul.practice_list').prepend('<li class="practice_text list-group-item">'+return_practice["return_practice"]);
                 $(this).prev("input").val("");
-                ga('send', 'event', "practice", "practice_submit");
+                ga('gtag_UA_465060_8.send', 'event', "practice", "practice_submit");
             });
         }
     });
