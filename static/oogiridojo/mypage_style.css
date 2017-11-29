@@ -1,0 +1,23 @@
+#rank1{
+    color:gold;
+}
+#rank2{
+    color:silver;
+}
+#rank3{
+    color:#b87333;
+}
+#ranking_title{
+    font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
+    font-size:1.5rem;
+    color:#555;
+}
+.ranking_answer_text{
+    font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
+    font-size:1.2rem;
+    color:#000;
+}
+li.answer_text{
+    padding-top:5px;
+    padding-bottom:5px;
+}
