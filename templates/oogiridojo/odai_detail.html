@@ -1,5 +1,9 @@
 {% extends "oogiridojo/base.html" %}
 
+{% block other_metas %}
+<meta name="description" content="みんなでワイワイ大喜利をやるサイトです。登録やログインは不要です。ここでのお題は「{{ odai.odai_text }}」です。">
+{% endblock %}
+
 {% block page_title %}{{ odai.odai_text }} -- 岡竜之介の大喜利道場{% endblock %}
 
 {% block judgement_link %}
