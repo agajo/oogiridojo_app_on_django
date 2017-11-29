@@ -16,12 +16,18 @@
                 {% for judge in judgement_list %}
                 {% with answer=judge.answer %}
                     <li class="answer_text list-group-item">
-                        <a href="{% url 'oogiridojo:odai' answer.odai.id %}">
-                            <h4 class="odai_text">{{ answer.odai.odai_text }}</h4>
-                        </a>
-                        <a href="{% url 'oogiridojo:odai' answer.odai.id %}#answer_id_{{ answer.id }}">
-                            <div class="ranking_answer_text">{{ answer.answer_text }}</div>
-                        </a>
+                        <div class="odai_container">
+                            <p>お題：</p>
+                            <a href="{% url 'oogiridojo:odai' answer.odai.id %}">
+                                <h4 class="odai_text">{{ answer.odai.odai_text }}</h4>
+                            </a>
+                        </div>
+                        <div class="answer_container">
+                            <p>回答：</p>
+                            <a href="{% url 'oogiridojo:odai' answer.odai.id %}#answer_id_{{ answer.id }}">
+                                <div class="ranking_answer_text">{{ answer.answer_text }}</div>
+                            </a>
+                        </div>
                         <div class="answer_buttons">
                             <span {% if answer.is_number_one %}class="number_one_indicator"{% endif %}>
                                 {% if answer.is_number_one %}

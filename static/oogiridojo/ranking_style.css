@@ -13,6 +13,30 @@
     color:#555;
 }
 .ranking_answer_text{
-    font-size:1.2rem;
+    font-size:1.6rem;
     color:#000;
+}
+li.answer_text{
+    margin-top:30px;
+    margin-bottom:30px;
+    padding-top:10px;
+    padding-bottom:10px;
+}
+div.odai_container{
+    border:solid 1px #f99;
+    background-color:#fffafa;
+}
+div.answer_container{
+    margin-top:20px;
+    margin-bottom:10px;
+    border:solid 1px #99f;
+    padding-bottom:20px;
+    background-color:#fafaff;
+}
+div.ranking_answer_text{
+    font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
+    text-align:center;
+}
+h4.odai_text{
+    text-align:center;
 }
