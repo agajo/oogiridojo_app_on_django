@@ -14,6 +14,7 @@
 <p><h1 id="ranking_title">マイページ</h1></p>
 {% if monkasei %}
     <p>あなたは「{{ monkasei.name }}」です。</p>
+    <p>あなたの人間力は{{ monkasei.ningenryoku }}です。</p>
     <p>最近の良い数は{{ monkasei.free_vote_score }}です。</p>
 {% endif %}
         <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">

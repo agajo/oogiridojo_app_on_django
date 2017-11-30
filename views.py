@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils import timezone
 from django.db.models import Sum
+from django.contrib import messages
 import datetime
 from .functions import rname
 
@@ -66,22 +67,39 @@ class GreatView(generic.ListView):
 
 def answer_submit(request):
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
-        monkasei_id = request.get_signed_cookie('monkasei_id')
+        monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
     else:
         monkasei = Monkasei(name = rname())
         monkasei.save()
-        monkasei_id = monkasei.id
-    answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei_id)
-    answer.save()
+    if(monkasei.ningenryoku<=50):
+        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
+        answer.save()
+        monkasei.ningenryoku = monkasei.ningenryoku+5
+        monkasei.save()
+    else:
+        messages.info(request, "人間力が高すぎます。良いすると下がります。回答："+request.POST['answer_text'])
     response = HttpResponseRedirect(reverse('oogiridojo:odai',kwargs={'pk':request.POST['odai_id']}))
-    response.set_signed_cookie('monkasei_id', monkasei_id, max_age = 94610000)
+    response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
     return response
 
 def free_vote(request):
-    answer = Answer.objects.get(pk = request.POST['free_vote_button'])
-    answer.free_vote_score += 1
-    answer.save()
-    return JsonResponse({"newscore":answer.free_vote_score})
+    if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
+        monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
+        if(monkasei.ningenryoku>0):
+            answer = Answer.objects.get(pk = request.POST['free_vote_button'])
+            if(answer.monkasei.id == monkasei.id):
+                newscore = "自分の投稿です。"
+            else:
+                answer.free_vote_score += 1
+                answer.save()
+                monkasei.ningenryoku = monkasei.ningenryoku-1
+                monkasei.save()
+                newscore = answer.free_vote_score
+        else:
+            newscore="人間力が低すぎます。回答の投稿で上がります。"
+    else:
+        newscore="回答を投稿するのが先です。"
+    return JsonResponse({"newscore":newscore})
 
 def tsukkomi_submit(request):
     tsukkomi = Tsukkomi(tsukkomi_text = request.POST['tsukkomi_text'], answer_id = request.POST['answer_id'])
