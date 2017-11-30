@@ -6,6 +6,7 @@ from django.views import generic
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils import timezone
+from django.db.models import Sum
 import datetime
 from .functions import rname
 
@@ -101,14 +102,15 @@ def voice_toggle(request):
     request.session.set_expiry(2628000)#有効期限一ヶ月にしてみる。
     return HttpResponse(request.session['voice_toggle'])
 
-class MypageView(generic.ListView):
-    model = Answer
+class MypageView(generic.DetailView):
+    model = Monkasei
     template_name = "oogiridojo/mypage.html"
-    def get_queryset(self):
-        if(self.request.get_signed_cookie('monkasei_id',False)):#キーがない場合はエラーの代わりにFalseを返す。便利ね。
-            return Answer.objects.filter(monkasei_id__exact = self.request.get_signed_cookie('monkasei_id')).order_by('-id')
+    def get_object(self):
+        monkasei_id = self.request.get_signed_cookie('monkasei_id',False)
+        if(monkasei_id):
+            return Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=14)).annotate(free_vote_score=Sum('answer__free_vote_score')).get(id=monkasei_id)
         else:
-            return []
+            return False
 
 class ArticleView(generic.DetailView):
     model = Article
@@ -122,3 +124,14 @@ def practice_submit(request):
     practice = Practice(answer_text=request.POST['practice_text'], article_id=request.POST['article_id'])
     practice.save()
     return JsonResponse({"return_practice":practice.answer_text})
+
+class MonkaseiYoiRankingView(generic.ListView):
+    model = Monkasei
+    template_name = "oogiridojo/monkasei_yoi_ranking.html"
+    def get_queryset(self):
+        monkaseis = Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=14)).annotate(free_vote_score=Sum('answer__free_vote_score')).order_by('-free_vote_score')[:3]
+        #こんな風にannotate使って、後から処理したフィールド(プロパティ・属性)加えられるんだね〜
+        #filterをannotateの前に入れることで、MonkaseiだけではなくAnswerもフィルタできるらしい。なんか直感と違う。
+        for monkasei in monkaseis:
+            monkasei.free_vote_score = round(monkasei.free_vote_score,-1)
+        return monkaseis

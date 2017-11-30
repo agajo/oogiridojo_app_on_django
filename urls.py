@@ -19,5 +19,6 @@ urlpatterns = [
     url(r'^article/$', views.ArticleListView.as_view(), name='article_list'),
     url(r'^article/(?P<pk>[0-9]+)/$', views.ArticleView.as_view(), name='article'),
     url(r'^practice_submit/$', views.practice_submit, name='practice_submit'),
+    url(r'^monkasei_yoi_ranking/$', views.MonkaseiYoiRankingView.as_view(), name='monkasei_yoi_ranking'),
 ]
 
