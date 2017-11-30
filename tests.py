@@ -314,7 +314,7 @@ class MypageViewTests(TestCase):
         c1 = Client()
         c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
         #answerを投稿することで、門下生としてのデータが作られる
-        monkasei = Monkasei.objects.get(pk=1)
+        monkasei = Monkasei.objects.order_by('id').first()
         response = c1.get(reverse('oogiridojo:mypage'))
         self.assertContains(response,monkasei.name)
 
@@ -322,8 +322,9 @@ class MypageViewTests(TestCase):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
         c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
+        answer = Answer.objects.order_by('id').first()
         for i in range(143):
-            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':1})#作ったanswerのidは1でしょう
+            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
         response = c1.get(reverse('oogiridojo:mypage'))
         self.assertContains(response,"143")
 
@@ -331,9 +332,9 @@ class MypageViewTests(TestCase):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
         c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
-        monkasei = Monkasei.objects.get(pk=1)
-        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1, free_vote_score=136)
-        answer2 = Answer.objects.create(answer_text="ww", odai_id = odai.id, monkasei_id=1, free_vote_score=123, creation_date="2010-10-10T03:03:03+09:00")
+        monkasei = Monkasei.objects.order_by('id').first()
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=monkasei.id, free_vote_score=136)
+        answer2 = Answer.objects.create(answer_text="ww", odai_id = odai.id, monkasei_id=monkasei.id, free_vote_score=123, creation_date="2010-10-10T03:03:03+09:00")
         response = c1.get(reverse('oogiridojo:mypage'))
         self.assertContains(response,"最近の良い数は136です。")
         self.assertContains(response,"123")#回答自体を表示する方には古い奴も出る
@@ -385,16 +386,15 @@ class MonkaseiYoiRankingViewTests(TestCase):
         c2 = Client()
         c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
         c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"uuuuuu"})
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"eeeeee"})
+        answers = Answer.objects.order_by('id')[:2]
+        monkaseis = Monkasei.objects.order_by('id')[:2]
+        #ポスグレは、こうやっていきなり作ったデータもid何になるかわからんので、「1」とか指定しないでいちいち取得します。
         for i in range(43):
-            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':1})#作ったanswerのidは一つ目は1でしょう
+            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answers[0].id})
         for i in range(433):
-            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':2})
+            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answers[1].id})
         response = c1.get(reverse('oogiridojo:monkasei_yoi_ranking'))
-        monkasei1 = Monkasei.objects.get(pk=1)
-        monkasei2 = Monkasei.objects.get(pk=2)
-        self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: '+monkasei2.name+'>', '<Monkasei: '+monkasei1.name+'>'])
+        self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: '+monkaseis[1].name+'>', '<Monkasei: '+monkaseis[0].name+'>'])
         self.assertContains(response,"40")
         self.assertContains(response,"430")
 
@@ -404,12 +404,11 @@ class MonkaseiYoiRankingViewTests(TestCase):
         c2 = Client()
         c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
         c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
-        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1, free_vote_score=106)
-        answer2 = Answer.objects.create(answer_text="ww", odai_id = odai.id, monkasei_id=1, free_vote_score=123, creation_date="2010-10-10T03:03:03+09:00")
-        answer3 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=2, free_vote_score=137)
+        monkaseis = Monkasei.objects.order_by('id')
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=monkaseis[0].id, free_vote_score=106)
+        answer2 = Answer.objects.create(answer_text="ww", odai_id = odai.id, monkasei_id=monkaseis[0].id, free_vote_score=123, creation_date="2010-10-10T03:03:03+09:00")
+        answer3 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=monkaseis[1].id, free_vote_score=137)
         response = c1.get(reverse('oogiridojo:monkasei_yoi_ranking'))
-        monkasei1 = Monkasei.objects.get(pk=1)
-        monkasei2 = Monkasei.objects.get(pk=2)
-        self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: '+monkasei2.name+'>', '<Monkasei: '+monkasei1.name+'>'])
+        self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: '+monkaseis[1].name+'>', '<Monkasei: '+monkaseis[0].name+'>'])
         self.assertContains(response,"110")
         self.assertContains(response,"140")
