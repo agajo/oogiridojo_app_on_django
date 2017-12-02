@@ -80,9 +80,53 @@ class OdaiViewAnswersTests(TestCase):
     def test_free_vote_score_increment(self):
         odai = Odai.objects.create(odai_text="oda")
         monkasei = Monkasei.objects.create(id=1, name="mon1")
+        default_score=1
+        answer = Answer.objects.create(answer_text="ふが", free_vote_score=default_score, odai_id = odai.id, monkasei_id=1)
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaa"})
+        response = c1.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
+        self.assertEqual(response.json()["newscore"], default_score+1)
+
+    def test_ningenryoku_decrease_when_free_vote(self):
+        odai = Odai.objects.create(odai_text="odaaaaaaaai")
+        c1 = Client()
+        c2 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaa"})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
+        monkasei = Monkasei.objects.order_by('id').first()
+        default = monkasei.ningenryoku
+        answer = Answer.objects.order_by("id").last()
+        c1.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
+        monkasei = Monkasei.objects.get(pk=monkasei.id)
+        self.assertEqual(monkasei.ningenryoku,default-1)
+
+    def test_cannot_vote_when_ningenryoku_zero(self):
+        odai = Odai.objects.create(odai_text="odaaaaaaaai")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaa"})
+        c2 = Client()
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
+        monkasei = Monkasei.objects.order_by('id').first()
+        monkasei.ningenryoku = 0
+        monkasei.save()
+        answer = Answer.objects.order_by("id").last()
+        response = c1.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
+        self.assertTrue("人間力が低すぎます。" in response.json()["newscore"])
+
+    def test_cannot_vote_to_my_answer(self):
+        odai = Odai.objects.create(odai_text="odaaaaaaaai")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
+        answer = Answer.objects.order_by("id").first()
+        response = c1.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
+        self.assertEqual(response.json()["newscore"],"自分の投稿です。")
+
+    def test_cannot_vote_before_submit_one_answer(self):
+        odai = Odai.objects.create(odai_text="oda")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id, monkasei_id=1)
         response = self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
-        self.assertEqual(response.json()["newscore"], 2)
+        self.assertEqual(response.json()["newscore"],"回答を投稿するのが先です。")
 
     def test_tsukkomi_submit(self):
         odai = Odai.objects.create(odai_text="oda")
@@ -109,6 +153,28 @@ class OdaiViewAnswersTests(TestCase):
         #なので、あらためてindexを取得し直す。
         response2 = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response2,"あんてき")
+
+    def test_ningenryoku_increase_when_answer_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき"})
+        monkasei = Monkasei.objects.order_by("id").first()
+        default = monkasei.ningenryoku
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき2"})
+        monkasei = Monkasei.objects.get(pk=monkasei.id)
+        self.assertEqual(monkasei.ningenryoku,default+5)
+
+    def test_cannot_submit_answer_when_ningenryoku_much(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき"})
+        monkasei = Monkasei.objects.order_by("id").first()
+        monkasei.ningenryoku=51
+        monkasei.save()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき2"})
+        #↑これのレスポンスは302が返るので、それに従ってクライアントからもっかいリクエストを投げる
+        response = c1.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
+        self.assertContains(response,"人間力が高すぎます。")
 
     def test_show_judgement(self):
         odai = Odai.objects.create(odai_text="ジャッジあり")
@@ -322,9 +388,11 @@ class MypageViewTests(TestCase):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
         c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
+        c2 = Client()
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaa"})
         answer = Answer.objects.order_by('id').first()
-        for i in range(143):
-            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
+        answer.free_vote_score=143
+        answer.save()
         response = c1.get(reverse('oogiridojo:mypage'))
         self.assertContains(response,"143")
 
@@ -389,10 +457,13 @@ class MonkaseiYoiRankingViewTests(TestCase):
         answers = Answer.objects.order_by('id')[:2]
         monkaseis = Monkasei.objects.order_by('id')[:2]
         #ポスグレは、こうやっていきなり作ったデータもid何になるかわからんので、「1」とか指定しないでいちいち取得します。
-        for i in range(43):
-            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answers[0].id})
-        for i in range(433):
-            self.client.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answers[1].id})
+        answer1 = answers[0]
+        answer2 = answers[1]
+        answer1.free_vote_score = 43
+        #answers[0].free_vote_score=43 とすると何故か代入されない。なので一度別途変数に取り出してます。
+        answer1.save()
+        answer2.free_vote_score = 433
+        answer2.save()
         response = c1.get(reverse('oogiridojo:monkasei_yoi_ranking'))
         self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: '+monkaseis[1].name+'>', '<Monkasei: '+monkaseis[0].name+'>'])
         self.assertContains(response,"40")
