@@ -34,6 +34,9 @@ ul.tsukkomi_list{
 li.tsukkomi_text{
     color:#b44;
 }
+div.tsukkomi_form{
+    text-align:right;
+}
 span.judgement_rank_1{
     color:#3a3;
 }

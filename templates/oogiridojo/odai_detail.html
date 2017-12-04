@@ -44,7 +44,7 @@
                         </div>
 
                         <!-- tsukkomi form from here. default collapsed. -->
-                        <div id="tsukkomi_form_{{ answer.id }}" class="collapse">
+                        <div id="tsukkomi_form_{{ answer.id }}" class="tsukkomi_form collapse">
                             <input type="text" name="tsukkomi_text" class="form-control">
                             <button type='button' class = "tsukkomi_submit_button btn btn-danger btn-sm" name="tsukkomi_submit_button" formaction="{% url 'oogiridojo:tsukkomi_submit' %}" value="{{ answer.id }}" data-toggle="collapse" href="#tsukkomi_form_{{ answer.id }}" aria-expanded="false" aria-controls="tsukkomi_form_{{ answer.id }}">投稿する</button>
                         </div>
