@@ -1,5 +1,6 @@
 from django.conf.urls import url
-
+from django.contrib.sitemaps.views import sitemap
+from .sitemap import sitemaps
 from . import views
 
 app_name = 'oogiridojo'
@@ -20,5 +21,5 @@ urlpatterns = [
     url(r'^article/(?P<pk>[0-9]+)/$', views.ArticleView.as_view(), name='article'),
     url(r'^practice_submit/$', views.practice_submit, name='practice_submit'),
     url(r'^monkasei_yoi_ranking/$', views.MonkaseiYoiRankingView.as_view(), name='monkasei_yoi_ranking'),
+    url(r'^sitemap\.xml$', sitemap, {'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]
-
