@@ -7,7 +7,7 @@
 #rank3{
     color:#b87333;
 }
-#ranking_title{
+h1.element_title{
     font-family: Georgia,游明朝,"Yu Mincho",YuMincho,"Hiragino Mincho ProN",HGS明朝E,メイリオ,Meiryo,serif;
     font-size:1.5rem;
     color:#555;

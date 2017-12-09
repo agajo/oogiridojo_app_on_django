@@ -1,0 +1,25 @@
+div.section_div{
+    margin-top:10px;
+    border:solid 1.5px #ddd;
+    border-radius:5px;
+    padding-top:5px;
+    padding-bottom:5px;
+}
+li.answer_text{
+    background-color:rgba(255,255,255,0.5);
+}
+div#great_answers_ranking{
+    background-color:#fffbfb;
+}
+div#yoi_answers_ranking{
+    background-color:#fbfffb;
+}
+div#monkasei_yoi_ranking{
+    background-color:#fff9ff;
+}
+div#articles_div{
+    background-color:#fffff9;
+}
+div#site_details_div{
+    background-color:#fffbfb;
+}

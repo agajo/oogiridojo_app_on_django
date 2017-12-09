@@ -15,11 +15,21 @@ from .functions import rname
 
 from .models import Odai, Answer, Tsukkomi, Judgement, Monkasei, Article, Practice
 
-class IndexView(generic.DetailView):
-    model = Odai
+class IndexView(generic.TemplateView):
     template_name = 'oogiridojo/index.html'
-    def get_object(self):
-        return Odai.objects.all().order_by('id').last()
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        context['odai'] = Odai.objects.order_by('-id').first()
+        context['judgement_list'] = Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:5]
+        context['answer_list'] = Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=7)).order_by('-free_vote_score')[:5]
+        monkaseis = Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=14)).annotate(free_vote_score=Sum('answer__free_vote_score')).order_by('-free_vote_score')[:2]
+        #こんな風にannotate使って、後から処理したフィールド(プロパティ・属性)加えられるんだね〜
+        #filterをannotateの前に入れることで、MonkaseiだけではなくAnswerもフィルタできるらしい。なんか直感と違う。
+        for monkasei in monkaseis:
+            monkasei.free_vote_score = round(monkasei.free_vote_score,-1)
+        context['monkasei_list'] = monkaseis
+        context['article_list'] =  Article.objects.all().order_by('id')
+        return context
 
 class OdaiView(generic.DetailView):
     model = Odai
