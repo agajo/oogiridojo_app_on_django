@@ -48,6 +48,19 @@ class IndexViewTests(TestCase):
         #お題一覧にどうせ両方含まれるので、コンテンツ内の<h1>の方でチェック
         self.assertContains(response,"<title>岡竜之介の大喜利道場</title>")
 
+    def test_index_rankings(self):
+        odai = Odai.objects.create(id=1, odai_text="test_index_rankings")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        monkasei2 = Monkasei.objects.create(id=2, name="mon2")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, free_vote_score=1, monkasei_id=1)
+        ans2 = Answer.objects.create(answer_text="ans2", odai_id=1, free_vote_score=300, monkasei_id=2)
+        judgement2 = Judgement.objects.create(judgement_score=3, judgement_text="いいね2", answer_id=ans2.id)
+        judgement1 = Judgement.objects.create(judgement_score=3, judgement_text="いいね1", answer_id=ans1.id)
+        response = self.client.get(reverse("oogiridojo:index"))
+        self.assertQuerysetEqual(response.context['answer_list'],['<Answer: ans2>', '<Answer: ans1>'])
+        self.assertQuerysetEqual(response.context['judgement_list'],['<Judgement: いいね1>', '<Judgement: いいね2>'])
+        self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: mon2>', '<Monkasei: mon1>'])
+
 class OdaiViewAnswersTests(TestCase):
     def test_no_answers(self):
         odai = Odai.objects.create(odai_text="odaoda")
@@ -278,21 +291,21 @@ class JudgementViewTests(TestCase):
 
 class AudioSessionTests(TestCase):
     def test_toggle_not_checked_at_first(self):
-        response = self.client.get(reverse('oogiridojo:index'))
+        response = self.client.get(reverse('oogiridojo:mypage'))
         self.assertContains(response,'<input type="checkbox" id="voice_toggle" formaction="/oogiridojo/voice_toggle/" >')
 
     def test_toggle_still_on_when_visited_again(self):
         c = Client()
         response = c.post(reverse("oogiridojo:voice_toggle"),{'voice_toggle':'true'})
         self.assertEqual(response.content,b'true')
-        response2 = c.get(reverse("oogiridojo:index"))
+        response2 = c.get(reverse("oogiridojo:mypage"))
         self.assertContains(response2,'<input type="checkbox" id="voice_toggle" formaction="/oogiridojo/voice_toggle/" checked>')
         
     def test_toggle_still_off_when_visited_again(self):
         c = Client()
         response = c.post(reverse("oogiridojo:voice_toggle"),{'voice_toggle':'false'})
         self.assertEqual(response.content,b'false')
-        response2 = c.get(reverse("oogiridojo:index"))
+        response2 = c.get(reverse("oogiridojo:mypage"))
         self.assertContains(response2,'<input type="checkbox" id="voice_toggle" formaction="/oogiridojo/voice_toggle/" >')
 
 class JudgerViewTests(TestCase):
