@@ -160,6 +160,8 @@ class MonkaseiYoiRankingView(generic.ListView):
         monkaseis = Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=14)).annotate(free_vote_score=Sum('answer__free_vote_score')).order_by('-free_vote_score')[:3]
         #こんな風にannotate使って、後から処理したフィールド(プロパティ・属性)加えられるんだね〜
         #filterをannotateの前に入れることで、MonkaseiだけではなくAnswerもフィルタできるらしい。なんか直感と違う。
+        #model側で先にfree_vote_scoreフィールド作ろうとしたけど、そういうpythonサイドで先に処理した情報はSQLに反映できない。
+        #SQL一発でランキング取得するにはこの方法しかない。
         for monkasei in monkaseis:
             monkasei.free_vote_score = round(monkasei.free_vote_score,-1)
         return monkaseis

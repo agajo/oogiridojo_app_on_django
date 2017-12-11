@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils import timezone
+import datetime
 
 # Create your models here.
-from django.db.models import Max
+from django.db.models import Max, Sum
 
 class Odai(models.Model):
     odai_text = models.CharField(max_length=100)
@@ -27,6 +28,10 @@ class Monkasei(models.Model):
     creation_date = models.DateTimeField('date created', default=timezone.now)
     def __str__(self):
         return self.name
+    def recent_free_vote_score(self):
+        return self.answer_set.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=14)).aggregate(score=Sum('free_vote_score'))['score']
+        #adminで得点確認するときしか使ってません。ランキング表示にも使いたかったけど、このpythonサイドの情報を元にしたSQLは発行できない。
+        #同じ理由で、adminでもこの点数をもとに並び替えはできない。
 
 class Answer(models.Model):
     odai = models.ForeignKey(Odai, on_delete=models.CASCADE)

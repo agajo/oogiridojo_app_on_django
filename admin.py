@@ -15,7 +15,7 @@ admin.site.register(Judgement)
 admin.site.register(Session)
 
 class MonkaseiAdmin(admin.ModelAdmin):
-    list_display = ['name','ningenryoku']
+    list_display = ['name','ningenryoku','recent_free_vote_score']
 
 admin.site.register(Monkasei, MonkaseiAdmin)
 admin.site.register(Article)
