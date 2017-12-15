@@ -59,7 +59,8 @@ class IndexViewTests(TestCase):
         response = self.client.get(reverse("oogiridojo:index"))
         self.assertQuerysetEqual(response.context['answer_list'],['<Answer: ans2>', '<Answer: ans1>'])
         self.assertQuerysetEqual(response.context['judgement_list'],['<Judgement: いいね1>', '<Judgement: いいね2>'])
-        self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: mon2>', '<Monkasei: mon1>'])
+        self.assertQuerysetEqual(response.context['yoi_monkasei_list'],['<Monkasei: mon2>', '<Monkasei: mon1>'])
+        self.assertQuerysetEqual(response.context['great_monkasei_list'],['<Monkasei: mon2>', '<Monkasei: mon1>'])
 
 class OdaiViewAnswersTests(TestCase):
     def test_no_answers(self):
@@ -373,6 +374,10 @@ class GreatAnswersViewTests(TestCase):
         #新しい順に出ること、ランク3だけが出ること、をチェックしてます。
 
 class MypageViewTests(TestCase):
+    def test_mypage_without_monkasei_id(self):
+        response = self.client.get(reverse('oogiridojo:mypage'))
+        self.assertContains(response,"回答がありません。")
+
     def test_mypage_answers(self):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
@@ -419,6 +424,18 @@ class MypageViewTests(TestCase):
         response = c1.get(reverse('oogiridojo:mypage'))
         self.assertContains(response,"最近の良い数は136です。")
         self.assertContains(response,"123")#回答自体を表示する方には古い奴も出る
+
+    def test_mypage_great_count(self):
+        odai = Odai.objects.create(odai_text="mypage view answers")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aa"})
+        answer1 = Answer.objects.order_by('id').first()
+        answer2 = Answer.objects.order_by('id').last()
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer1.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="u", answer_id=answer2.id, creation_date="2010-01-01T01:01:01+09:00")
+        response = c1.get(reverse('oogiridojo:mypage'))
+        self.assertContains(response,"獲得数は1です")
 
 #↓↓↓↓ここから、大喜利の「型」がらみのテストです。本当は分割したいけどやり方がわからんので。
 #いつかわかったら分割しておいて。2017-11-14
@@ -496,3 +513,51 @@ class MonkaseiYoiRankingViewTests(TestCase):
         self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: '+monkaseis[1].name+'>', '<Monkasei: '+monkaseis[0].name+'>'])
         self.assertContains(response,"110")
         self.assertContains(response,"140")
+
+class MonkaseiGreatRankingViewTests(TestCase):
+    def test_monkasei_order(self):
+        odai = Odai.objects.create(odai_text="great answer test")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        monkasei2 = Monkasei.objects.create(id=2, name="mon2")
+        monkasei3 = Monkasei.objects.create(id=3, name="mon3")
+        monkasei4 = Monkasei.objects.create(id=4, name="mon4")
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer21 = Answer.objects.create(answer_text="uu21", odai_id = odai.id, monkasei_id=2)
+        answer22 = Answer.objects.create(answer_text="uu22", odai_id = odai.id, monkasei_id=2)
+        answer3 = Answer.objects.create(answer_text="uu3", odai_id = odai.id, monkasei_id=3)
+        answer4 = Answer.objects.create(answer_text="uu4", odai_id = odai.id, monkasei_id=4)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer1.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer21.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer22.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer4.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer3.id)
+        response = self.client.get(reverse('oogiridojo:monkasei_great_ranking'))
+        self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: mon2>', '<Monkasei: mon1>','<Monkasei: mon4>'])
+
+    def test_not_calculate_old_answers(self):
+        odai = Odai.objects.create(odai_text="great answer test")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        monkasei2 = Monkasei.objects.create(id=2, name="mon2")
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer21 = Answer.objects.create(answer_text="uu21", odai_id = odai.id, monkasei_id=2)
+        answer22 = Answer.objects.create(answer_text="uu22", odai_id = odai.id, monkasei_id=2)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer1.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer21.id, creation_date="2010-01-01T01:01:01+09:00")
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer22.id, creation_date="2010-01-01T01:01:01+09:00")
+        response = self.client.get(reverse('oogiridojo:monkasei_great_ranking'))
+        self.assertQuerysetEqual(response.context['monkasei_list'],['<Monkasei: mon1>'])
+        #有効な「最近の3点回答」がないmon2は、ランキングに表示されません。
+
+    def test_the_same_count_model_and_ranking(self):
+        odai = Odai.objects.create(odai_text="great answer test")
+        Monkasei.objects.create(id=1, name="mon1")
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer2 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer3 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer1.id)
+        Judgement.objects.create(judgement_score=2, judgement_text="uuu", answer_id=answer2.id)
+        Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer3.id, creation_date="2010-01-01T01:01:01+09:00")
+        monkasei1 = Monkasei.objects.get(id=1)
+        ranking = self.client.get(reverse('oogiridojo:monkasei_great_ranking'))
+        self.assertEqual(monkasei1.recent_great_answer_count(),1)
+        self.assertEqual(ranking.context['monkasei_list'].first().great_count,1)

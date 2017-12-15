@@ -29,7 +29,7 @@
 <body>
 
 
-<header class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+<header class="navbar navbar-expand-md navbar-light bg-light fixed-top">
     <a href="{% url 'oogiridojo:index' %}"><span id="site_name" class="navbar-brand">岡竜之介の大喜利道場</span></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -52,14 +52,16 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'oogiridojo:mypage' %}">マイページ</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'oogiridojo:great_answers' %}">最近の３点回答</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'oogiridojo:yoi_ranking' %}">最近の良い回答ランキング</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'oogiridojo:monkasei_yoi_ranking' %}">最近の良い門下生ランキング</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                   ランキングなど 
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="nav-link" href="{% url 'oogiridojo:great_answers' %}">最近の３点回答</a>
+                    <a class="nav-link" href="{% url 'oogiridojo:yoi_ranking' %}">最近の良い回答ランキング</a>
+                    <a class="nav-link" href="{% url 'oogiridojo:monkasei_great_ranking' %}">最近の3点獲得者ランキング</a>
+                    <a class="nav-link" href="{% url 'oogiridojo:monkasei_yoi_ranking' %}">最近の良い門下生ランキング</a>
+                </div>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'oogiridojo:article_list' %}">大喜利の「型」</a>

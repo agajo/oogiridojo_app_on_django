@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^practice_submit/$', views.practice_submit, name='practice_submit'),
     url(r'^monkasei_yoi_ranking/$', views.MonkaseiYoiRankingView.as_view(), name='monkasei_yoi_ranking'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    url(r'^monkasei_great_ranking/$', views.MonkaseiGreatRankingView.as_view(), name='monkasei_great_ranking'),
 ]

@@ -6,7 +6,7 @@ from django.views import generic
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, Count, Max
 from django.contrib import messages
 import datetime
 from .functions import rname
@@ -22,12 +22,13 @@ class IndexView(generic.TemplateView):
         context['odai'] = Odai.objects.order_by('-id').first()
         context['judgement_list'] = Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:5]
         context['answer_list'] = Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=7)).order_by('-free_vote_score')[:5]
+        context['great_monkasei_list'] = Monkasei.objects.filter(answer__judgement__creation_date__gte = timezone.now() - datetime.timedelta(days=14), answer__judgement__judgement_score__exact = 3).annotate(great_count = Count('answer__judgement'), great_newest = Max('answer__judgement__creation_date')).order_by('-great_count','great_newest')[:2]
         monkaseis = Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=14)).annotate(free_vote_score=Sum('answer__free_vote_score')).order_by('-free_vote_score')[:2]
         #こんな風にannotate使って、後から処理したフィールド(プロパティ・属性)加えられるんだね〜
         #filterをannotateの前に入れることで、MonkaseiだけではなくAnswerもフィルタできるらしい。なんか直感と違う。
         for monkasei in monkaseis:
             monkasei.free_vote_score = round(monkasei.free_vote_score,-1)
-        context['monkasei_list'] = monkaseis
+        context['yoi_monkasei_list'] = monkaseis
         context['article_list'] =  Article.objects.all().order_by('id')
         return context
 
@@ -136,7 +137,7 @@ class MypageView(generic.DetailView):
     def get_object(self):
         monkasei_id = self.request.get_signed_cookie('monkasei_id',False)
         if(monkasei_id):
-            return Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=14)).annotate(free_vote_score=Sum('answer__free_vote_score')).get(id=monkasei_id)
+            return Monkasei.objects.get(id=monkasei_id)
         else:
             return False
 
@@ -165,3 +166,12 @@ class MonkaseiYoiRankingView(generic.ListView):
         for monkasei in monkaseis:
             monkasei.free_vote_score = round(monkasei.free_vote_score,-1)
         return monkaseis
+
+class MonkaseiGreatRankingView(generic.ListView):
+    model = Monkasei
+    template_name = "oogiridojo/monkasei_great_ranking.html"
+    def get_queryset(self):
+        return Monkasei.objects.filter(answer__judgement__creation_date__gte = timezone.now() - datetime.timedelta(days=14), answer__judgement__judgement_score__exact = 3).annotate(great_count = Count('answer__judgement'), great_newest = Max('answer__judgement__creation_date')).order_by('-great_count','great_newest')[:3]
+    #最近の3点ジャッジが多い順
+    #同数の場合は、先にそのスコアに達した順、つまり、最後の3点獲得の時刻が小さい順
+    #filter関数をチェインするといらんINNER JOINが発生してCOUNTがおかしくなります。一つのfilter内に複数条件書こう。

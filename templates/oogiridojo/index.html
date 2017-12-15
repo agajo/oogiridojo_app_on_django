@@ -181,13 +181,14 @@
 
 
 
+
     <div class="row">
-    <div id="monkasei_yoi_ranking" class="section_div col-md">
-        <a href="{% url 'oogiridojo:monkasei_yoi_ranking' %}"><h1 class="element_title">最近の良い門下生ランキング</h1></a>
+    <div id="monkasei_great_ranking" class="section_div col-md">
+        <a href="{% url 'oogiridojo:monkasei_great_ranking' %}"><h1 class="element_title">最近の3点獲得者ランキング</h1></a>
         <ul class="answer_list list-group">
-            {% for monkasei in monkasei_list %}
+            {% for monkasei in great_monkasei_list %}
                 <li class="answer_text list-group-item">
-                    <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>約{{ monkasei.free_vote_score }}良い
+                    <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>{{ monkasei.great_count }}回獲得
                     <div class="ranking_answer_text">{{ monkasei.name }}</div>
                 </li>
             {% empty %}
@@ -198,6 +199,25 @@
 
 
 
+
+    <div id="monkasei_yoi_ranking" class="section_div col-md">
+        <a href="{% url 'oogiridojo:monkasei_yoi_ranking' %}"><h1 class="element_title">最近の良い門下生ランキング</h1></a>
+        <ul class="answer_list list-group">
+            {% for monkasei in yoi_monkasei_list %}
+                <li class="answer_text list-group-item">
+                    <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>約{{ monkasei.free_vote_score }}良い
+                    <div class="ranking_answer_text">{{ monkasei.name }}</div>
+                </li>
+            {% empty %}
+                <li>回答がありません。</li>
+            {% endfor %}
+        </ul>
+    </div>
+    </div><!-- end of row -->
+
+
+
+    <div class="row">
     <div id="articles_div" class="section_div col-md">
         <a href="{% url 'oogiridojo:article_list' %}"><h1 class="element_title">大喜利の「型」</h1></a>
         <ul>
@@ -206,12 +226,10 @@
             {% endfor %}
         </ul>
     </div>
-    </div><!-- end of row -->
 
 
 
 
-    <div class="row">
     <div id="site_details_div" class="section_div col-md">
         サイトの説明
         <ul>

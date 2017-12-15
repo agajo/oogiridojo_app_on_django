@@ -1,0 +1,27 @@
+{% extends "oogiridojo/base.html" %}
+
+{% load static %}
+
+{% block other_metas %}
+<meta name="description" content="岡竜之介の大喜利道場の門下生(投稿者)のうち、良い回答をした人を紹介しています。名前は道場側で勝手に付けています。">
+{% endblock %}
+
+{% block page_title %}最近の3点獲得者ランキング--岡竜之介の大喜利道場{% endblock %}
+
+{% block other_styles %}
+    <link rel="stylesheet" href="{% static 'oogiridojo/ranking_style.css' %}">
+{% endblock %}
+
+{% block main_content %}
+<h1 id="ranking_title" class="element_title">最近の3点獲得者ランキング</h1>
+        <ul class="answer_list list-group">
+            {% for monkasei in monkasei_list %}
+                <li class="answer_text list-group-item">
+                    <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>{{ monkasei.great_count }}回獲得
+                    <div class="ranking_answer_text">{{ monkasei.name }}</div>
+                </li>
+            {% empty %}
+                <li>回答がありません。</li>
+            {% endfor %}
+        </ul>
+{% endblock main_content %}
