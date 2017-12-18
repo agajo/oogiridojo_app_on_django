@@ -189,7 +189,7 @@
             {% for monkasei in great_monkasei_list %}
                 <li class="answer_text list-group-item">
                     <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>{{ monkasei.great_count }}回獲得
-                    <div class="ranking_answer_text">{{ monkasei.name }}</div>
+                    <div class="ranking_answer_text">{{ monkasei.name }}<span class="san"> さん</span></div>
                 </li>
             {% empty %}
                 <li>回答がありません。</li>
@@ -206,7 +206,7 @@
             {% for monkasei in yoi_monkasei_list %}
                 <li class="answer_text list-group-item">
                     <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>約{{ monkasei.free_vote_score }}良い
-                    <div class="ranking_answer_text">{{ monkasei.name }}</div>
+                    <div class="ranking_answer_text">{{ monkasei.name }}<span class="san"> さん</span></div>
                 </li>
             {% empty %}
                 <li>回答がありません。</li>
