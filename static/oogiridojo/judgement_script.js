@@ -1,7 +1,7 @@
 $(function(){
     $(".judge_button").on('click',function(){
         if($(this).prev("input").val()!=""){
-
+            $(this).prop("disbled",true);
             $.ajax({
                 url:$(this).closest('form').attr('action'),
                 type:'post',

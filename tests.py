@@ -199,16 +199,6 @@ class OdaiViewAnswersTests(TestCase):
         self.assertContains(response,"1点。")
         self.assertContains(response,"いいね")
 
-    def test_show_judgement_link_with_permission(self):
-        odai = Odai.objects.create(odai_text="うで")
-        user = User.objects.create_user("judger", password="hoge")
-        permission = Permission.objects.get(codename='add_judgement')
-        user.user_permissions.add(permission)
-        c = Client()
-        c.login(username="judger", password="hoge")
-        response = c.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
-        self.assertContains(response,'ジャッジ</a>')
-
     def test_not_show_judgement_link_without_permission(self):
         odai = Odai.objects.create(odai_text="うで")
         user = User.objects.create_user("judger", password="hoge")
@@ -339,6 +329,39 @@ class JudgerViewTests(TestCase):
         self.assertEqual(response.context['ratio1'],20.0)
         self.assertEqual(response.context['ratio2'],40.0)
         self.assertEqual(response.context['ratio3'],40.0)
+
+    def test_show_answer_when_not_judged(self):
+        odai = Odai.objects.create(odai_text="ジャッジなし")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
+        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:judger'))
+        self.assertEqual(response.status_code,200)
+        self.assertContains(response,"あご")
+        self.assertContains(response, "judgement_form")
+        # formが表示されることを、formのclassの名前でチェックしてます。
+
+    def test_not_show_answer_when_judged(self):
+        odai = Odai.objects.create(odai_text="ジャッジあり2")
+        monkasei = Monkasei.objects.create(id=1, name="mon1")
+        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
+        judgement = Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer.id)
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:judger'))
+        self.assertEqual(response.status_code,200)
+        self.assertNotContains(response,"あご")
+        self.assertNotContains(response,"1点。")
+        self.assertNotContains(response,"いいね")
+        self.assertNotContains(response, "judgement_form")
+        # formが表示されないことを、formのclassの名前でチェックしてます。
 
 class YoiRankingViewTests(TestCase):
     def test_ranking_context(self):

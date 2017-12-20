@@ -47,6 +47,8 @@ class JudgerView(PermissionRequiredMixin, generic.TemplateView):
     template_name = 'oogiridojo/judger.html'
     def get_context_data(self, **kwargs):
         countall = Judgement.objects.count()
+        if(countall == 0):
+            countall = 1#これが実行される時、値には意味がないので、なんでもいい。0除算を防いでるだけ。
         count1 = Judgement.objects.filter(judgement_score=1).count()
         count2 = Judgement.objects.filter(judgement_score=2).count()
         count3 = Judgement.objects.filter(judgement_score=3).count()
@@ -62,6 +64,7 @@ class JudgerView(PermissionRequiredMixin, generic.TemplateView):
                         "ratio2":ratio2*100,
                         "ratio3":ratio3*100,
         })
+        context["answer_list"] = Answer.objects.filter(judgement__isnull = True).order_by("-id")[:30]
         return context
 
 class YoiView(generic.ListView):

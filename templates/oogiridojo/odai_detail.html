@@ -6,12 +6,6 @@
 
 {% block page_title %}{{ odai.odai_text }} -- 岡竜之介の大喜利道場{% endblock %}
 
-{% block judgement_link %}
-    {% if perms.oogiridojo.add_judgement %}
-        <a class="nav-link" href="{% url 'oogiridojo:judgement' odai.id %}">ジャッジ</a>
-    {% endif %}
-{% endblock %}
-
 {% block main_content %}
     <section id="odai" class="odai_section">
         <h1 class="odai_text">{{ odai.odai_text }}</h1>
