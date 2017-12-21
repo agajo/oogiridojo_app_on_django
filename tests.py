@@ -397,7 +397,7 @@ class GreatAnswersViewTests(TestCase):
         #新しい順に出ること、ランク3だけが出ること、をチェックしてます。
 
 class RecentAnswersViewTests(TestCase):
-    def test_ranking_context(self):
+    def test_context(self):
         odai = Odai.objects.create(odai_text="スト")
         monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
@@ -406,13 +406,15 @@ class RecentAnswersViewTests(TestCase):
         self.assertQuerysetEqual(response.context['answer_list'],['<Answer: iiii>', '<Answer: uu>'])
 
 class RecentTsukkomiAnswersViewTests(TestCase):
-    def test_ranking_context(self):
+    def test_context(self):
         odai = Odai.objects.create(odai_text="テスト")
         monkasei = Monkasei.objects.create(id=1, name="mon1")
-        answer1 = Answer.objects.create(answer_text="uu", free_vote_score=1, odai_id = odai.id, monkasei_id=1)
-        answer2 = Answer.objects.create(answer_text="iiii", free_vote_score=2, odai_id = odai.id, monkasei_id=1)
+        answer0 = Answer.objects.create(answer_text="uuasfs", odai_id = odai.id, monkasei_id=1)
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer2 = Answer.objects.create(answer_text="iiii", odai_id = odai.id, monkasei_id=1)
         Tsukkomi.objects.create(answer_id=answer2.id, tsukkomi_text="hoge")
         Tsukkomi.objects.create(answer_id=answer1.id, tsukkomi_text="fuga")
+        answer4 = Answer.objects.create(answer_text="fs", odai_id = odai.id, monkasei_id=1)
         response = self.client.get(reverse('oogiridojo:recent_tsukkomi_answers'))
         self.assertQuerysetEqual(response.context['answer_list'],['<Answer: uu>', '<Answer: iiii>'])
 

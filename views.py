@@ -89,7 +89,7 @@ class RecentTsukkomiAnswersView(generic.ListView):
     model = Answer
     template_name = "oogiridojo/recent_tsukkomi_answers.html"
     def get_queryset(self):
-        return Answer.objects.annotate(tsukkomi_newest = Max('tsukkomi__creation_date')).order_by('-tsukkomi_newest')[:30]
+        return Answer.objects.filter(tsukkomi__isnull = False).annotate(tsukkomi_newest = Max('tsukkomi__creation_date')).order_by('-tsukkomi_newest')[:30]
 
 def answer_submit(request):
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
