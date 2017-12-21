@@ -13,13 +13,15 @@
 {% endblock %}
 
 {% block main_content %}
-<h1 id="ranking_title" class="element_title">最近の良い回答ランキング</h1>
+<h1 id="ranking_title" class="element_title">{% block show_page_title %}最近の良い回答ランキング{% endblock %}</h1>
         <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
             {% csrf_token %}
             <ul class="answer_list list-group">
                 {% for answer in answer_list %}
                     <li class="answer_text list-group-item">
-                        <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>
+                        {% block rank_indicator %}
+                            <h3 id="rank{{ forloop.counter }}">{{ forloop.counter }}位</h3>
+                        {% endblock %}
                         <div class="odai_container">
                             <p class="odai_label">お題：</p>
                             <a href="{% url 'oogiridojo:odai' answer.odai.id %}">

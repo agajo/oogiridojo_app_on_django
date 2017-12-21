@@ -23,4 +23,6 @@ urlpatterns = [
     url(r'^monkasei_yoi_ranking/$', views.MonkaseiYoiRankingView.as_view(), name='monkasei_yoi_ranking'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     url(r'^monkasei_great_ranking/$', views.MonkaseiGreatRankingView.as_view(), name='monkasei_great_ranking'),
+    url(r'^recent_answers/$', views.RecentAnswersView.as_view(), name="recent_answers"),
+    url(r'^recent_tsukkomi_answers/$', views.RecentTsukkomiAnswersView.as_view(), name="recent_tsukkomi_answers"),
 ]

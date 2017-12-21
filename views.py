@@ -79,6 +79,18 @@ class GreatView(generic.ListView):
     def get_queryset(self):
         return Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:30]
 
+class RecentAnswersView(generic.ListView):
+    model = Answer
+    template_name = "oogiridojo/recent_answers.html"
+    def get_queryset(self):
+        return Answer.objects.order_by("-creation_date")[:30]
+
+class RecentTsukkomiAnswersView(generic.ListView):
+    model = Answer
+    template_name = "oogiridojo/recent_tsukkomi_answers.html"
+    def get_queryset(self):
+        return Answer.objects.annotate(tsukkomi_newest = Max('tsukkomi__creation_date')).order_by('-tsukkomi_newest')[:30]
+
 def answer_submit(request):
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
         monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))

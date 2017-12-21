@@ -54,6 +54,8 @@
                    ランキングなど 
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="nav-link" href="{% url 'oogiridojo:recent_answers' %}">最新の回答</a>
+                    <a class="nav-link" href="{% url 'oogiridojo:recent_tsukkomi_answers' %}">最新のツッコミが入った回答</a>
                     <a class="nav-link" href="{% url 'oogiridojo:great_answers' %}">最近の３点回答</a>
                     <a class="nav-link" href="{% url 'oogiridojo:yoi_ranking' %}">最近の良い回答ランキング</a>
                     <a class="nav-link" href="{% url 'oogiridojo:monkasei_great_ranking' %}">最近の3点獲得者ランキング</a>
