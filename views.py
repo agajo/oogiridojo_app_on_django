@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.utils import timezone
 from django.db.models import Sum, Count, Max
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 import datetime
 from .functions import rname
 
@@ -99,9 +100,14 @@ def answer_submit(request):
         monkasei.save()
     if(monkasei.ningenryoku<=50):
         answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
-        answer.save()
-        monkasei.ningenryoku = monkasei.ningenryoku+5
-        monkasei.save()
+        try:
+            answer.full_clean()
+            answer.save()
+            monkasei.ningenryoku = monkasei.ningenryoku+5
+            monkasei.save()
+        except ValidationError as e:
+            messages.info(request, "回答が長すぎます。回答："+request.POST['answer_text'])
+            #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
     else:
         messages.info(request, "人間力が高すぎます。良いすると下がります。回答："+request.POST['answer_text'])
     response = HttpResponseRedirect(reverse('oogiridojo:odai',kwargs={'pk':request.POST['odai_id']}))
@@ -129,17 +135,25 @@ def free_vote(request):
 
 def tsukkomi_submit(request):
     tsukkomi = Tsukkomi(tsukkomi_text = request.POST['tsukkomi_text'], answer_id = request.POST['answer_id'])
-    tsukkomi.save()
-    answer = Answer.objects.get(pk=request.POST['answer_id'])
-    answer.modified_date = timezone.now()
-    answer.save()
-    return JsonResponse({"return_tsukkomi":tsukkomi.tsukkomi_text})
+    try:
+        tsukkomi.full_clean()
+        tsukkomi.save()
+        answer = Answer.objects.get(pk=request.POST['answer_id'])
+        answer.modified_date = timezone.now()
+        answer.save()#ここの3行は後日消しましょう2017-12-23
+        return JsonResponse({"return_tsukkomi":tsukkomi.tsukkomi_text})
+    except ValidationError:
+        return JsonResponse({"error":"error"})
 
 @permission_required('oogiridojo.add_judgement')
 def judgement_submit(request):
     judgement = Judgement(answer_id = request.POST["answer_id"], judgement_text = request.POST['judgement_text'], judgement_score = request.POST['judgement_score'])
-    judgement.save()
-    return JsonResponse({"score":judgement.judgement_score, "text":judgement.judgement_text})
+    try:
+        judgement.full_clean()#ローカルのsqliteのために、ここでvalidationして字数過多の時にエラーを返すようにします。
+        judgement.save()
+        return JsonResponse({"score":judgement.judgement_score, "text":judgement.judgement_text})
+    except ValidationError :
+        return JsonResponse({"error":"error"})
 
 def voice_toggle(request):
     request.session['voice_toggle'] = request.POST['voice_toggle']

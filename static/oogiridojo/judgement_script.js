@@ -9,9 +9,13 @@ $(function(){
                 dataType:"json",
                 context:$(this),
             }).done(function(return_judgement){
-                $(this).closest("form").after(return_judgement["score"]).after(return_judgement["text"]);
-                $(this).closest("form").remove();
-            })
+                if("score" in return_judgement){
+                    $(this).closest("form").after(return_judgement["score"]).after(return_judgement["text"]);
+                    $(this).closest("form").remove();
+                }else if("error" in return_judgement){
+                    $(this).after("<p>失敗</p>");
+                };
+            });
         };
     });
 

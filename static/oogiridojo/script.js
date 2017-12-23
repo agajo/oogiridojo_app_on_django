@@ -40,11 +40,18 @@ $(function(){
                 dataType:"json",
                 context:$(this),
             }).done(function(return_tsukkomi){
-                $(this).closest('div').next('ul.tsukkomi_list').append('<li class="tsukkomi_text">'+return_tsukkomi["return_tsukkomi"]);
-                $(this).prev("input").val("");
-                ga('gtag_UA_465060_8.send', 'event', "tsukkomi", "tsukkomi_submit");
+                if("return_tsukkomi" in return_tsukkomi){
+                    $(this).closest('div').next('ul.tsukkomi_list').append('<li class="tsukkomi_text">'+return_tsukkomi["return_tsukkomi"]);
+                    $(this).prev("input").val("");
+                    ga('gtag_UA_465060_8.send', 'event', "tsukkomi", "tsukkomi_submit");
+                }else if("error" in return_tsukkomi){
+                    $(this).closest('div').toggleClass("show");
+                    if($(this).next("p").length==0){//2個以上メッセージを追加しないための処理分け
+                        $(this).after('<p>ツッコミが長すぎます。</p>');
+                    };
+                };
             });
-        }
+        };
     });
 
     //回答の二重投稿防止。これで止めるのはボタン連打だけ。更新とかは関与しない。
