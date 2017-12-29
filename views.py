@@ -10,6 +10,7 @@ from django.db.models import Sum, Count, Max
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 import datetime
+import random
 from .functions import rname
 
 # Create your views here.
@@ -204,3 +205,53 @@ class MonkaseiGreatRankingView(generic.ListView):
     #最近の3点ジャッジが多い順
     #同数の場合は、先にそのスコアに達した順、つまり、最後の3点獲得の時刻が小さい順
     #filter関数をチェインするといらんINNER JOINが発生してCOUNTがおかしくなります。一つのfilter内に複数条件書こう。
+
+class AnswerGameView(generic.TemplateView):
+    template_name = "oogiridojo/answer_game.html"
+    def get_context_data(self, **kwargs):
+        if(self.request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
+            monkasei = Monkasei.objects.get(pk=self.request.get_signed_cookie('monkasei_id'))
+            if(monkasei.ningenryoku > 50):
+                play = False#人間力50超過ならプレイ不可
+            else:
+                play = True#人間力50以下ならプレイ可
+        else:
+            play = True#門下生データのない人はプレイ可
+        context = super(AnswerGameView, self).get_context_data(**kwargs)
+        context['play'] = play
+        return context
+
+def answer_game_start(request):
+    #idは歯抜けの可能性があるので、idをランダム指定ではなく、「何番目」をランダム指定
+    count = Odai.objects.aggregate(count=Count('id'))["count"]
+    i = random.choice(range(0,count))
+    odai = Odai.objects.order_by("id")[i]
+    return JsonResponse({"odai":odai.odai_text,"odai_id":odai.id})
+
+def answer_game_submit(request):
+    if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
+        monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
+    else:
+        monkasei = Monkasei(name = rname())
+        monkasei.save()
+    if(monkasei.ningenryoku<=50):
+        answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
+        answer2 = Answer(answer_text = request.POST['answer2'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
+        answer3 = Answer(answer_text = request.POST['answer3'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
+        try:
+            answer1.full_clean()
+            answer2.full_clean()
+            answer3.full_clean()
+            answer1.save()
+            answer2.save()
+            answer3.save()
+            monkasei.ningenryoku = monkasei.ningenryoku+15
+            monkasei.save()
+            response = JsonResponse({"ok":"投稿しました。"})
+        except ValidationError as e:
+            response = JsonResponse({"error":"空の回答があるか、長すぎる回答があります。"})
+            #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
+    else:
+        response = JsonResponse({"error":"人間力が高すぎます。最初は低かったんですけどね。何か変なことしました？下げてきてください。"})
+    response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
+    return response

@@ -1,0 +1,27 @@
+{% extends "oogiridojo/base.html" %}
+
+{% load static %}
+
+{% block page_title %}タイトル未定--岡竜之介の大喜利道場{% endblock %}
+
+
+{% block other_styles %}
+    <link rel="stylesheet" href="{% static 'oogiridojo/mypage_style.css' %}">
+{% endblock %}
+
+{% block main_content %}
+<h1 id="answer_game_title" class="element_title">大喜利回答練習機</h1>
+{% csrf_token %}
+<input type="hidden" id="answer_game_submit_url" formaction="{% url 'oogiridojo:answer_game_submit' %}">
+<input type="hidden" id="answer_game_url" formaction="{% url 'oogiridojo:answer_game' %}">
+
+<div id="game_area">
+<button id="answer_game_start_button" type="button" class="btn btn-danger" formaction="{% url 'oogiridojo:answer_game_start' %}" {% if not play %}disabled{% endif %}>はじめる</button>
+{% if not play %}<p>人間力が高すぎます。「良い」して下げてきてください。<a href="{% url 'oogiridojo:recent_answers' %}">最新の回答</a>{% endif %}
+</div>
+
+{% endblock main_content %}
+
+{% block other_scripts %}
+<script src="{% static 'oogiridojo/answer_game_script.js' %}"></script>
+{% endblock %}

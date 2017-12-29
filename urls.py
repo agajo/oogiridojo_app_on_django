@@ -25,4 +25,7 @@ urlpatterns = [
     url(r'^monkasei_great_ranking/$', views.MonkaseiGreatRankingView.as_view(), name='monkasei_great_ranking'),
     url(r'^recent_answers/$', views.RecentAnswersView.as_view(), name="recent_answers"),
     url(r'^recent_tsukkomi_answers/$', views.RecentTsukkomiAnswersView.as_view(), name="recent_tsukkomi_answers"),
+    url(r'^answer_game/$', views.AnswerGameView.as_view(), name="answer_game"),
+    url(r'^answer_game_start/$', views.answer_game_start, name="answer_game_start"),
+    url(r'^answer_game_submit/$', views.answer_game_submit, name="answer_game_submit"),
 ]
