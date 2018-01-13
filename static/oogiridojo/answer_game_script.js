@@ -72,17 +72,42 @@ function saitenchu(){
 
 function enforce(){
     score = answer[0].length + answer[1].length + answer[2].length;
+    if(score == 0){
+        comment = "いやいや。何か入力してください。";
+    }else if(score < 30){
+        comment = "もう少しがんばりましょう。";
+    }else if(score < 60){
+        comment = "うん。いい感じです。";
+    }else if(score < 100){
+        comment = "おお！結構頑張りましたね！";
+    }else{
+        comment = "素晴らしい〜〜〜〜！！！！";
+    };
+    $("div#game_area").css("text-align","left");
     $("div#game_area").append("<p id='your_score_is'>今回の点数は：</p>");
     $("div#game_area").append("<p id='score'>"+score+"点です。</p>");
-    $("div#game_area").append("<p id='comment'>よくできました。</p>");
-    $("div#game_area").append("<p>それぞれの回答を強化して、投稿しましょう。</p>");
+    $("div#game_area").append("<p id='comment'>"+comment+"</p>");
+    $("div#game_area").append("<p>それぞれの回答をしっかり強化して、投稿しましょう。</p>");
+    $("div#game_area").append("<ul class='list-group'>");
+    $("div#game_area").append("<li class='list-group-item'>");
     $("div#game_area").append("<p>"+answer[0]+"</p>");
-    $("div#game_area").append("<input type='text' id='answer1' value='"+answer[0]+"'>");
+    $("div#game_area").append("<input type='text' id='answer1' class='form-control' value='"+answer[0]+"'>");
+    $("div#game_area").append("</li>");
+    $("div#game_area").append("<li class='list-group-item'>");
     $("div#game_area").append("<p>"+answer[1]+"</p>");
-    $("div#game_area").append("<input type='text' id='answer2' value='"+answer[1]+"'>");
+    $("div#game_area").append("<input type='text' id='answer2' class='form-control' value='"+answer[1]+"'>");
+    $("div#game_area").append("</li>");
+    $("div#game_area").append("<li class='list-group-item'>");
     $("div#game_area").append("<p>"+answer[2]+"</p>");
-    $("div#game_area").append("<input type='text' id='answer3' value='"+answer[2]+"'>");
+    $("div#game_area").append("<input type='text' id='answer3' class='form-control' value='"+answer[2]+"'>");
+    $("div#game_area").append("</li>");
     $("div#game_area").append("<button id='answer_game_submit_button' type='button' class='btn btn-danger'>投稿する</button>");
+    $("div#game_area").append("<p>強化のコツ</p>");
+    $("div#game_area").append("<ul>");
+    $("div#game_area").append("<li>知ってるけど聞きなれない表現に言い換えてみましょう。</li>");
+    $("div#game_area").append("<li>大げさなことを言ってみましょう。</li>");
+    $("div#game_area").append("<li>複数解釈の余地を残さないようにしましょう。</li>");
+    $("div#game_area").append("</ul>");
 }
 
 $(function(){
@@ -105,9 +130,9 @@ $(function(){
                 url = $("input#answer_game_url").attr('formaction');
                 $("div#game_area").append("<a href='"+url+"'><button id='play_again' type='button' class='btn btn-danger'>もう一度プレイ</button></a>");
             }else{
-                $("button#answer_game_submit_button").next("p").remove();
+                $("button#answer_game_submit_button").next("p.error_message").remove();
                 setTimeout(function(){
-                    $("button#answer_game_submit_button").after("<p>"+return_json["error"]+"</p>");
+                    $("button#answer_game_submit_button").after("<p class='error_message'>"+return_json["error"]+"</p>");
                 },100);
             };
         });
