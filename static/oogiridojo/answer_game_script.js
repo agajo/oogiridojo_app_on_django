@@ -84,30 +84,31 @@ function enforce(){
         comment = "素晴らしい〜〜〜〜！！！！";
     };
     $("div#game_area").css("text-align","left");
-    $("div#game_area").append("<p id='your_score_is'>今回の点数は：</p>");
-    $("div#game_area").append("<p id='score'>"+score+"点です。</p>");
-    $("div#game_area").append("<p id='comment'>"+comment+"</p>");
-    $("div#game_area").append("<p>それぞれの回答をしっかり強化して、投稿しましょう。</p>");
-    $("div#game_area").append("<ul class='list-group'>");
-    $("div#game_area").append("<li class='list-group-item'>");
-    $("div#game_area").append("<p>"+answer[0]+"</p>");
-    $("div#game_area").append("<input type='text' id='answer1' class='form-control' value='"+answer[0]+"'>");
-    $("div#game_area").append("</li>");
-    $("div#game_area").append("<li class='list-group-item'>");
-    $("div#game_area").append("<p>"+answer[1]+"</p>");
-    $("div#game_area").append("<input type='text' id='answer2' class='form-control' value='"+answer[1]+"'>");
-    $("div#game_area").append("</li>");
-    $("div#game_area").append("<li class='list-group-item'>");
-    $("div#game_area").append("<p>"+answer[2]+"</p>");
-    $("div#game_area").append("<input type='text' id='answer3' class='form-control' value='"+answer[2]+"'>");
-    $("div#game_area").append("</li>");
-    $("div#game_area").append("<button id='answer_game_submit_button' type='button' class='btn btn-danger'>投稿する</button>");
-    $("div#game_area").append("<p>強化のコツ</p>");
-    $("div#game_area").append("<ul>");
-    $("div#game_area").append("<li>知ってるけど聞きなれない表現に言い換えてみましょう。</li>");
-    $("div#game_area").append("<li>大げさなことを言ってみましょう。</li>");
-    $("div#game_area").append("<li>複数解釈の余地を残さないようにしましょう。</li>");
-    $("div#game_area").append("</ul>");
+    append_text = "<p id='your_score_is'>今回の点数は：</p>"+
+        "<p id='score'>"+score+"点です。</p>"+
+        "<p id='comment'>"+comment+"</p>"+
+        "<p>それぞれの回答をしっかり強化して、投稿しましょう。</p>"+
+        "<ul class='list-group'>"+
+        "<li class='list-group-item'>"+
+        "<p>"+answer[0]+"</p>"+
+        "<input type='text' id='answer1' class='form-control' value='"+answer[0]+"'>"+
+        "</li>"+
+        "<li class='list-group-item'>"+
+        "<p>"+answer[1]+"</p>"+
+        "<input type='text' id='answer2' class='form-control' value='"+answer[1]+"'>"+
+        "</li>"+
+        "<li class='list-group-item'>"+
+        "<p>"+answer[2]+"</p>"+
+        "<input type='text' id='answer3' class='form-control' value='"+answer[2]+"'>"+
+        "</li>"+
+        "<button id='answer_game_submit_button' type='button' class='btn btn-danger'>投稿する</button>"+
+        "強化のコツ"+
+        "<ul>"+
+        "<li>知ってるけど聞きなれない表現に言い換えてみましょう。</li>"+
+        "<li>大げさなことを言ってみましょう。</li>"+
+        "<li>複数解釈の余地を残さないようにしましょう。</li>"+
+        "</ul>";
+    $("div#game_area").append(append_text);
 }
 
 $(function(){
@@ -126,6 +127,7 @@ $(function(){
         }).done(function(return_json){
             if("ok" in return_json){
                 $("div#game_area").html("");
+                $("div#game_area").css("text-align","center");
                 $("div#game_area").append("<p>投稿しました。</p>");
                 url = $("input#answer_game_url").attr('formaction');
                 $("div#game_area").append("<a href='"+url+"'><button id='play_again' type='button' class='btn btn-danger'>もう一度プレイ</button></a>");
