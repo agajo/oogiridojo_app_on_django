@@ -634,3 +634,66 @@ class MonkaseiGreatRankingViewTests(TestCase):
         ranking = self.client.get(reverse('oogiridojo:monkasei_great_ranking'))
         self.assertEqual(monkasei1.recent_great_answer_count(),1)
         self.assertEqual(ranking.context['monkasei_list'].first().great_count,1)
+
+class AnswerGameTests(TestCase):
+    def test_show_start_button(self):
+        response = self.client.get(reverse('oogiridojo:answer_game'))
+        self.assertContains(response,"answer_game_start_button")
+
+    def test_diable_start_button_when_high_ningenryoku(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき"})
+        monkasei = Monkasei.objects.order_by("id").first()
+        monkasei.ningenryoku=51
+        monkasei.save()
+        response = c1.get(reverse('oogiridojo:answer_game'))
+        self.assertContains(response,"人間力が高すぎます。")
+        self.assertContains(response,"disabled")
+
+    def test_start_game(self):
+        odai = Odai.objects.create(odai_text="oda")
+        response = self.client.get(reverse('oogiridojo:answer_game_start'))
+        self.assertEqual(response.json()["odai"], "oda")#ランダム取得だけど、一個しかないので、これが入ってるはず。
+
+    def test_answer_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"ほげええ"})
+        monkasei = Monkasei.objects.order_by("id").first()
+        default = monkasei.ningenryoku
+        c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
+        monkasei = Monkasei.objects.get(pk=monkasei.id)
+        self.assertEqual(monkasei.ningenryoku,default+15)#人間力が15増えている
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
+        self.assertContains(response,"あんてき1")#回答の投稿ができている
+        self.assertContains(response,"あんてき2")
+        self.assertContains(response,"あんてき3")
+
+    def test_answer_submit_and_create_monkasei(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
+        monkasei = Monkasei.objects.order_by("id").first()
+        response = c1.get(reverse("oogiridojo:mypage"))
+        self.assertContains(response,"あんてき3")#門下生が作られたことを確認したいだけ。もっといい方法あるかも。
+
+    def test_not_answer_submit_when_high_ningenryoku(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
+        monkasei = Monkasei.objects.order_by("id").first()
+        monkasei.ningenryoku=51
+        monkasei.save()
+        response = c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"4", 'answer2':"5", 'answer3':"6"})
+        self.assertIn("人間力が高",response.json()["error"])
+
+    def test_too_long_answer_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        response = self.client.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':"このような句読点が少ない文章は文章の流れをつかみにくく読みづらいという欠点を持つが書く人はこの方が早く書けることもあるので「句読点が多い文章」よりは出現しやすくさらにパソコンやワープロなどで書き印刷する場合は紙のスペースの節約になり省資源にも多少は貢献すると思われるのみならず最近の女子高生が携帯電話からブログに書いた文章においては句読点がないのが普通だったりするんだけれども読みやすさ第一を心がける場合においては句読点をつけすぎなさすぎないことはやめましょうといいながらも蓮実重彦という東大総長にもなったとても偉い先生や吉田健一というとても偉い英文学者はこの調子で本を二三冊書いていたりするのであながち書き手に問題があるというよりはそれを読む方の能力にかかっているとも言え読みにくいんだよバーカとか言ったらおのれの読解力が低いんじゃと逆襲されることもあるからちょっと注意した方がいいよとのアドバイスを書き込もうとしてよく考えてみたら流石に蓮実も吉田も句点は打ってたなあと思い出し結局こういう文章は読みにくいなあとの当たり前の結論に達したところでこういう文章はやめた方がいいねと再度念を押しておくことにするが僭越ながら句読点が少ない文章というのは一般論的に苛々するものであってかといって多すぎるのも否めないとも言い切れもしないでもないがそうだからといって世の中の老若男女にとってはあんてき3"})
+        self.assertIn("長すぎ",response.json()["error"])
+
+    def test_zero_length_answer_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        response = self.client.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':""})
+        self.assertIn("空の",response.json()["error"])
