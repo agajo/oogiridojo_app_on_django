@@ -33,7 +33,7 @@ function countdown(){//3,2,1のカウントダウン。
 function main_game_start(){
     $("div#game_area").append("<input type='text' id='answer_input'>");
     $("input#answer_input").focus();
-    n=2;//一つの回答の制限時間
+    n=20;//一つの回答の制限時間
     $("div#game_area").append("<p id='time_count'>"+n+"</p>");
     $("p#time_count").html(n);
     id = setInterval(function(){
