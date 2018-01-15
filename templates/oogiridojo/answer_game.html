@@ -16,6 +16,17 @@
 <input type="hidden" id="answer_game_url" formaction="{% url 'oogiridojo:answer_game' %}">
 
 <div id="game_area">
+    <div class="row justify-content-center">
+        <div class="col-10 howtoplay">
+            <ul>
+                <li>生大喜利のような緊張感の中で、素早く回答を出す練習をしましょう。</li>
+                <li>お題が出るので、20秒で1つ回答を考えます。</li>
+                <li>できるだけ成立した回答を出しましょう。</li>
+                <li>3つ回答したら終了。採点されます。</li>
+                <li>回答を修正・強化し、投稿しておきましょう。</li>
+            </ul>
+        </div>
+    </div>
 <button id="answer_game_start_button" type="button" class="btn btn-danger" formaction="{% url 'oogiridojo:answer_game_start' %}" {% if not play %}disabled{% endif %}>はじめる</button>
 {% if not play %}<p>人間力が高すぎます。「良い」して下げてきてください。<a href="{% url 'oogiridojo:recent_answers' %}">最新の回答</a>{% endif %}
 </div>

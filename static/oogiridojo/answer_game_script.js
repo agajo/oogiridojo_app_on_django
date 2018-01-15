@@ -88,17 +88,18 @@ function enforce(){
         "<p id='score'>"+score+"点です。</p>"+
         "<p id='comment'>"+comment+"</p>"+
         "<p>それぞれの回答をしっかり強化して、投稿しましょう。</p>"+
+        "<p>お題："+odai+"</p>"+
         "<ul class='list-group'>"+
         "<li class='list-group-item'>"+
-        "<p>"+answer[0]+"</p>"+
+        "<p>回答1："+answer[0]+"</p>"+
         "<input type='text' id='answer1' class='form-control' value='"+answer[0]+"'>"+
         "</li>"+
         "<li class='list-group-item'>"+
-        "<p>"+answer[1]+"</p>"+
+        "<p>回答2："+answer[1]+"</p>"+
         "<input type='text' id='answer2' class='form-control' value='"+answer[1]+"'>"+
         "</li>"+
         "<li class='list-group-item'>"+
-        "<p>"+answer[2]+"</p>"+
+        "<p>回答3："+answer[2]+"</p>"+
         "<input type='text' id='answer3' class='form-control' value='"+answer[2]+"'>"+
         "</li>"+
         "<button id='answer_game_submit_button' type='button' class='btn btn-danger'>投稿する</button>"+
