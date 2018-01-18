@@ -224,7 +224,7 @@ class AnswerGameView(generic.TemplateView):
 def answer_game_start(request):
     #idは歯抜けの可能性があるので、idをランダム指定ではなく、「何番目」をランダム指定
     count = Odai.objects.aggregate(count=Count('id'))["count"]
-    i = random.choice(range(0,count))
+    i = random.choice(range(count))
     odai = Odai.objects.order_by("id")[i]
     return JsonResponse({"odai":odai.odai_text,"odai_id":odai.id})
 
@@ -254,4 +254,49 @@ def answer_game_submit(request):
     else:
         response = JsonResponse({"error":"人間力が高すぎます。最初は低かったんですけどね。何か変なことしました？下げてきてください。"})
     response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
+    return response
+
+class TsukkomiGameView(generic.TemplateView):
+    template_name = "oogiridojo/tsukkomi_game.html"
+
+def tsukkomi_game_start(request):
+    #idは歯抜けの可能性があるので、idをランダム指定ではなく、「何番目」をランダム指定
+    answer_count=0
+    while(answer_count<5):#ほとんどの場合、一発で5以上になるはず。そうでないと、なかなか終わらない処理になっちゃう。
+        count = Odai.objects.aggregate(count=Count('id'))["count"]
+        i = random.choice(range(0,count))
+        odai = Odai.objects.order_by("id")[i]
+        answer_count = Answer.objects.filter(odai_id=odai.id).aggregate(count=Count('id'))["count"]
+    indexes = random.sample(range(answer_count),5)
+    answers = []
+    for index in indexes:
+        answer = Answer.objects.filter(odai_id=odai.id).order_by('id')[index]
+        answers.append({"id":answer.id, "answer_text":answer.answer_text})
+    return JsonResponse({
+        "odai_id":odai.id,
+        "odai":odai.odai_text,
+        "answers":answers
+        })
+
+def tsukkomi_game_submit(request):
+    tsukkomi1 = Tsukkomi(tsukkomi_text = request.POST['answer1'], answer_id = request.POST['aid1'])
+    tsukkomi2 = Tsukkomi(tsukkomi_text = request.POST['answer2'], answer_id = request.POST['aid2'])
+    tsukkomi3 = Tsukkomi(tsukkomi_text = request.POST['answer3'], answer_id = request.POST['aid3'])
+    tsukkomi4 = Tsukkomi(tsukkomi_text = request.POST['answer4'], answer_id = request.POST['aid4'])
+    tsukkomi5 = Tsukkomi(tsukkomi_text = request.POST['answer5'], answer_id = request.POST['aid5'])
+    try:
+        tsukkomi1.full_clean()
+        tsukkomi2.full_clean()
+        tsukkomi3.full_clean()
+        tsukkomi4.full_clean()
+        tsukkomi5.full_clean()
+        tsukkomi1.save()
+        tsukkomi2.save()
+        tsukkomi3.save()
+        tsukkomi4.save()
+        tsukkomi5.save()
+        response = JsonResponse({"ok":"投稿しました。"})
+    except ValidationError as e:
+        response = JsonResponse({"error":"空の回答があるか、長すぎる回答があります。"})
+        #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
     return response
