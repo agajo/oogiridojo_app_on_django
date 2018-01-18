@@ -32,7 +32,7 @@ function countdown(){//3,2,1のカウントダウン。
 }
 
 function main_game_start(){
-    $("div#game_area").append("<p>"+answers[m]["answer_text"]+"</p>");
+    $("div#game_area").append("<p id='tsukkomi_text'>"+answers[m]["answer_text"]+"</p>");
     $("div#game_area").append("<input type='text' id='tsukkomi_input'>");
     $("input#tsukkomi_input").focus();
     n=15;//一つの回答の制限時間
@@ -46,7 +46,7 @@ function main_game_start(){
             $("p#time_count").remove();
             tsukkomis[m] = $("input#tsukkomi_input").val();
             $("input#tsukkomi_input").remove();
-            $("div#game_area").append("<p>"+tsukkomis[m]+"</p>");
+            $("p#tsukkomi_text").remove();
             m++;
             if(m>=5){//所定の回数だけツッコミを得たら、次にいきます。
                 $("div#game_area").animate({"opacity":0},1000,function(){
@@ -118,11 +118,11 @@ function enforce(){
         "<input type='text' id='answer5' class='form-control' value='"+tsukkomis[4]+"'>"+
         "</li>"+
         "<button id='tsukkomi_game_submit_button' type='button' class='btn btn-danger'>投稿する</button>"+
-        "強化のコツ"+
+        "ツッコミのコツ"+
         "<ul>"+
-        "<li>知ってるけど聞きなれない表現に言い換えてみましょう。</li>"+
-        "<li>大げさなことを言ってみましょう。</li>"+
-        "<li>複数解釈の余地を残さないようにしましょう。</li>"+
+        "<li>回答の意図を汲み取りましょう。</li>"+
+        "<li>気付きにくい面白要素に言及しましょう。</li>"+
+        "<li>知ってるけど聞きなれない表現を使ってみましょう。</li>"+
         "</ul>";
     $("div#game_area").append(append_text);
 }

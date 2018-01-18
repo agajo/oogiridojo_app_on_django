@@ -697,3 +697,89 @@ class AnswerGameTests(TestCase):
         odai = Odai.objects.create(odai_text="oda")
         response = self.client.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':""})
         self.assertIn("空の",response.json()["error"])
+
+class TsukkomiGameTests(TestCase):
+    def test_show_start_button(self):
+        response = self.client.get(reverse('oogiridojo:tsukkomi_game'))
+        self.assertContains(response,"tsukkomi_game_start_button")
+
+    def test_start_game(self):
+        odai = Odai.objects.create(odai_text="oda")
+        Monkasei.objects.create(id=1, name="mon1")
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer2 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer3 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer4 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer5 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        response = self.client.get(reverse('oogiridojo:tsukkomi_game_start'))
+        self.assertEqual(response.json()["odai"], "oda")#ランダム取得だけど、一個しかないので、これが入ってるはず。
+        self.assertEqual(response.json()["answers"][0]["answer_text"],"uu")#どのanswerが入ってもtextはこれ。
+        self.assertEqual(response.json()["answers"][4]["answer_text"],"uu")#どのanswerが入ってもtextはこれ。
+
+    def test_tsukkomi_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        Monkasei.objects.create(id=1, name="mon1")
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer2 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer3 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer4 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer5 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        self.client.post(reverse("oogiridojo:tsukkomi_game_submit"), {
+            'answer1':"つっこみ1",
+            'answer2':"あんてき2",
+            'answer3':"あんてき3",
+            'answer4':"あんてき3",
+            'answer5':"あんてき3",
+            'aid1':answer2.id,
+            'aid2':answer3.id,
+            'aid3':answer4.id,
+            'aid4':answer1.id,
+            'aid5':answer5.id
+        })
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
+        self.assertContains(response,"つっこみ1")
+        self.assertContains(response,"あんてき2")#ツッコミが投稿されていることを確認。
+
+    def test_too_long_tsukkomi_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        Monkasei.objects.create(id=1, name="mon1")
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer2 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer3 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer4 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer5 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        response = self.client.post(reverse("oogiridojo:tsukkomi_game_submit"), {
+            'answer1':"つっこみ1",
+            'answer2':"あんてき2",
+            'answer3':"このような句読点が少ない文章は文章の流れをつかみにくく読みづらいという欠点を持つが書く人はこの方が早く書けることもあるので「句読点が多い文章」よりは出現しやすくさらにパソコンやワープロなどで書き印刷する場合は紙のスペースの節約になり省資源にも多少は貢献すると思われるのみならず最近の女子高生が携帯電話からブログに書いた文章においては句読点がないのが普通だったりするんだけれども読みやすさ第一を心がける場合においては句読点をつけすぎなさすぎないことはやめましょうといいながらも蓮実重彦という東大総長にもなったとても偉い先生や吉田健一というとても偉い英文学者はこの調子で本を二三冊書いていたりするのであながち書き手に問題があるというよりはそれを読む方の能力にかかっているとも言え読みにくいんだよバーカとか言ったらおのれの読解力が低いんじゃと逆襲されることもあるからちょっと注意した方がいいよとのアドバイスを書き込もうとしてよく考えてみたら流石に蓮実も吉田も句点は打ってたなあと思い出し結局こういう文章は読みにくいなあとの当たり前の結論に達したところでこういう文章はやめた方がいいねと再度念を押しておくことにするが僭越ながら句読点が少ない文章というのは一般論的に苛々するものであってかといって多すぎるのも否めないとも言い切れもしないでもないがそうだからといって世の中の老若男女にとってはあんてき3あんてき3",
+            'answer4':"あんてき3",
+            'answer5':"あんてき3",
+            'aid1':answer2.id,
+            'aid2':answer3.id,
+            'aid3':answer4.id,
+            'aid4':answer1.id,
+            'aid5':answer5.id
+        })
+        self.assertIn("長すぎ",response.json()["error"])
+
+    def test_zero_length_tsukkomi_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        Monkasei.objects.create(id=1, name="mon1")
+        answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer2 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer3 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer4 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        answer5 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=1)
+        response = self.client.post(reverse("oogiridojo:tsukkomi_game_submit"), {
+            'answer1':"つっこみ1",
+            'answer2':"あんてき2",
+            'answer3':"s ",
+            'answer4':"",
+            'answer5':"あんてき3",
+            'aid1':answer2.id,
+            'aid2':answer3.id,
+            'aid3':answer4.id,
+            'aid4':answer1.id,
+            'aid5':answer5.id
+        })
+        self.assertIn("空の",response.json()["error"])
