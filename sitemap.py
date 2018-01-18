@@ -4,7 +4,7 @@ from .models import Odai, Article
 
 class StaticViewSitemap(Sitemap):
     def items(self):
-        return['index','recent_answers','recent_tsukkomi_answers','yoi_ranking','great_answers','monkasei_great_ranking','monkasei_yoi_ranking','mypage','article_list','answer_game']
+        return['index','recent_answers','recent_tsukkomi_answers','yoi_ranking','great_answers','monkasei_great_ranking','monkasei_yoi_ranking','mypage','article_list','answer_game','tsukkomi_game']
     def location(self, item):
         return reverse('oogiridojo:'+item)
 
