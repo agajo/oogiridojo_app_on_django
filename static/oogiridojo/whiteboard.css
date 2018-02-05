@@ -1,0 +1,9 @@
+canvas#myCanvas{
+    border-style:solid;
+    border-width:1px;
+    height:300px;
+    width:300px;
+}
+form#whiteboard_submit_form{
+    text-align:center;
+}

@@ -300,3 +300,7 @@ def tsukkomi_game_submit(request):
         response = JsonResponse({"error":"空の回答があるか、長すぎる回答があります。"})
         #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
     return response
+
+class WhiteboardView(generic.DetailView):
+    model = Odai
+    template_name = "oogiridojo/whiteboard.html"

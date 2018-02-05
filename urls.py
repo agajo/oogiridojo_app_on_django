@@ -31,4 +31,5 @@ urlpatterns = [
     url(r'^tsukkomi_game/$', views.TsukkomiGameView.as_view(), name="tsukkomi_game"),
     url(r'^tsukkomi_game_start/$', views.tsukkomi_game_start, name="tsukkomi_game_start"),
     url(r'^tsukkomi_game_submit/$', views.tsukkomi_game_submit, name="tsukkomi_game_submit"),
+    url(r'^odai/(?P<pk>[0-9]+)/whiteboard/$', views.WhiteboardView.as_view(), name='whiteboard'),
 ]

@@ -1,0 +1,30 @@
+{% extends "oogiridojo/base.html" %}
+
+{% load static %}
+
+{% block page_title %}ホワイトボード--岡竜之介の大喜利道場{% endblock %}
+
+
+{% block other_styles %}
+<link rel="stylesheet" href="{% static 'oogiridojo/whiteboard.css' %}">
+{% endblock %}
+
+{% block main_content %}
+    <h1 id="answer_game_title" class="element_title">ホワイトボード</h1>
+    <h2 class="odai_text">{{ odai.odai_text }}</h2>
+    <form id="whiteboard_submit_form" action="{% url 'oogiridojo:answer_submit' %}" method="post">
+        {% csrf_token %}
+        <input id="odai_id_input" type="hidden" name="odai_id" value="{{ odai.id }}">
+        <canvas id="myCanvas" width="300" height="300">使ってるやつこれ、非対応ブラウザですね…ブラウザなんとかしてください…すいません…</canvas>
+        <div class="row"><!-- .row from here -->
+            <input id="answer_text_input" type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
+            <button id="answer_submit_button" type="submit" class="answer_submit_button col-4 btn btn-danger btn-sm" formaction="{% url 'oogiridojo:answer_submit' %}">回答を投稿する</button>
+        </div><!-- end of .row -->
+    </form>
+{% endblock main_content %}
+
+{% block other_scripts %}
+    <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+    <script src="{% static 'oogiridojo/whiteboard.js' %}"></script>
+    <script src="{% static 'oogiridojo/whiteboard_submit.js' %}"></script>
+{% endblock %}
