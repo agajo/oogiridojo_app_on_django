@@ -39,6 +39,7 @@ class Answer(models.Model):
     odai = models.ForeignKey(Odai, on_delete=models.CASCADE)
     monkasei = models.ForeignKey(Monkasei, on_delete=models.CASCADE)
     answer_text = models.CharField(max_length=300)
+    img_datauri = models.TextField(blank=True)
     creation_date = models.DateTimeField('date created', default=timezone.now)
     modified_date = models.DateTimeField('date modified', default=timezone.now)
     free_vote_score = models.PositiveIntegerField(default=0)

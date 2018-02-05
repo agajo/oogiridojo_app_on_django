@@ -100,7 +100,7 @@ def answer_submit(request):
         monkasei = Monkasei(name = rname())
         monkasei.save()
     if(monkasei.ningenryoku<=50):
-        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
+        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri=request.POST['datauri'])
         try:
             answer.full_clean()
             answer.save()
