@@ -25,6 +25,11 @@
                 {% for answer in odai.answer_list %}
                 {# ここでodai.answer_list.reverseとして逆順にすると、何故かis_number_oneが全部消えちゃう #}
                     <li id="answer_id_{{ answer.id }}" class="answer_text list-group-item">
+                            {% if answer.img_datauri %}{# 画像がある場合は表示する #}
+                                <div class="answer_image">
+                                    <img src="{{ answer.img_datauri }}">
+                                </div>
+                            {% endif %}
                         <div>{{ answer.answer_text }}</div>
                         <div class="answer_buttons">
                             <span {% if answer.is_number_one %}class="number_one_indicator"{% endif %}>

@@ -26,6 +26,11 @@
                         <a href="{% url 'oogiridojo:odai' answer.odai.id %}">
                             <h4 class="odai_text">{{ answer.odai.odai_text }}</h4>
                         </a>
+                            {% if answer.img_datauri %}{# 画像がある場合は表示する #}
+                                <div class="answer_image">
+                                    <img src="{{ answer.img_datauri }}">
+                                </div>
+                            {% endif %}
                         <a href="{% url 'oogiridojo:odai' answer.odai.id %}#answer_id_{{ answer.id }}">
                             <div class="ranking_answer_text">{{ answer.answer_text }}</div>
                         </a>
