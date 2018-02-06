@@ -12,15 +12,13 @@
 {% block main_content %}
     <h1 id="answer_game_title" class="element_title">ホワイトボード</h1>
     <h2 class="odai_text">{{ odai.odai_text }}</h2>
-    <form id="whiteboard_submit_form" action="{% url 'oogiridojo:answer_submit' %}" method="post">
-        {% csrf_token %}
-        <input id="odai_id_input" type="hidden" name="odai_id" value="{{ odai.id }}">
-        <canvas id="myCanvas" width="300" height="300">使ってるやつこれ、非対応ブラウザですね…ブラウザなんとかしてください…すいません…</canvas>
-        <div class="row"><!-- .row from here -->
-            <input id="answer_text_input" type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
-            <button id="answer_submit_button" type="submit" class="answer_submit_button col-4 btn btn-danger btn-sm" formaction="{% url 'oogiridojo:answer_submit' %}">回答を投稿する</button>
-        </div><!-- end of .row -->
-    </form>
+    {% csrf_token %}
+    <input id="odai_id_input" type="hidden" name="odai_id" value="{{ odai.id }}">
+    <canvas id="myCanvas" width="300" height="300">使ってるやつこれ、非対応ブラウザですね…ブラウザなんとかしてください…すいません…</canvas>
+    <div id='answer_text_row' class="row">
+        <input id="answer_text_input" type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
+        <button id="answer_submit_button" type="button" class="answer_submit_button col-4 btn btn-danger btn-sm" formaction="{% url 'oogiridojo:answer_submit_with_image' %}">回答を投稿する</button>
+    </div>
 {% endblock main_content %}
 
 {% block other_scripts %}

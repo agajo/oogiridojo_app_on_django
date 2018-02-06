@@ -100,7 +100,7 @@ def answer_submit(request):
         monkasei = Monkasei(name = rname())
         monkasei.save()
     if(monkasei.ningenryoku<=50):
-        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri=request.POST['datauri'])
+        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
         try:
             answer.full_clean()
             answer.save()
@@ -304,3 +304,27 @@ def tsukkomi_game_submit(request):
 class WhiteboardView(generic.DetailView):
     model = Odai
     template_name = "oogiridojo/whiteboard.html"
+
+def answer_submit_with_image(request):
+#いつか、通常のanswer_submitもこっちに一本化します2018-02-05
+#つーか、answer_game_submitも一括で扱いたいね。2018-02-05
+    if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
+        monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
+    else:
+        monkasei = Monkasei(name = rname())
+        monkasei.save()
+    if(monkasei.ningenryoku<=50):
+        answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri = request.POST['datauri'])
+        try:
+            answer1.full_clean()
+            answer1.save()
+            monkasei.ningenryoku = monkasei.ningenryoku+5
+            monkasei.save()
+            response = JsonResponse({"ok":"投稿しました。"})
+        except ValidationError as e:
+            response = JsonResponse({"error":"回答が空か、長すぎます。"})
+            #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
+    else:
+        response = JsonResponse({"error":"人間力が高すぎます。別タブで下げてきてください。このタブで移動すると絵が消えます。"})
+    response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
+    return response
