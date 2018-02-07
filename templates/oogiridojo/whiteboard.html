@@ -12,9 +12,36 @@
 {% block main_content %}
     <h1 id="answer_game_title" class="element_title">ホワイトボード</h1>
     <h2 class="odai_text">{{ odai.odai_text }}</h2>
+
+    {# 後で必要になる情報をhiddenに置いとく。csrf_tokenとodai_id #}
     {% csrf_token %}
     <input id="odai_id_input" type="hidden" name="odai_id" value="{{ odai.id }}">
+    {# canvas #}
     <canvas id="myCanvas" width="300" height="300">使ってるやつこれ、非対応ブラウザですね…ブラウザなんとかしてください…すいません…</canvas>
+    {# 色とか太さとか #}
+    <p>
+    色：
+    <label class="color_black"><input type="radio" name="color" value="0,0,0" checked>■</label>
+    <label class="color_black"><input type="radio" name="color" value="255,255,255">□</label>
+    <label class="color_red"><input type="radio" name="color" value="255,0,0">■</label>
+    <label class="color_green"><input type="radio" name="color" value="0,255,0">■</label>
+    <label class="color_blue"><input type="radio" name="color" value="0,0,255">■</label>
+    <label class="color_cyan"><input type="radio" name="color" value="0,255,255">■</label>
+    <label class="color_magenta"><input type="radio" name="color" value="255,0,255">■</label>
+    <label class="color_yellow"><input type="radio" name="color" value="255,255,0">■</label>
+    </p>
+    <p>
+    太さ：
+    <label><input type="radio" name="thickness" value="20" class="thickness_20">極太</label>
+    <label><input type="radio" name="thickness" value="10" class="thickness_10">太</label>
+    <label><input type="radio" name="thickness" value="5" class="thickness_5" checked>中</label>
+    <label><input type="radio" name="thickness" value="2" class="thickness_2">細</label>
+    </p>
+    <p>
+    不透明度：
+    <input type="range" name="alpha" max="1" min="0" step="0.1" value="1">
+    </p>
+    {# 回答テキスト #}
     <div id='answer_text_row' class="row">
         <input id="answer_text_input" type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
         <button id="answer_submit_button" type="button" class="answer_submit_button col-4 btn btn-danger btn-sm" formaction="{% url 'oogiridojo:answer_submit_with_image' %}">回答を投稿する</button>

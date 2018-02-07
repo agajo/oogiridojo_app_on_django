@@ -2,7 +2,7 @@ $(function(){
     $(document).on('click',"button#answer_submit_button",function(){
         if(!confirm("投稿します。いいですか？")){return false;}
         var canvas = document.getElementById("myCanvas");
-        var datauri = canvas.toDataURL("image/jpeg",0.5);
+        var datauri = canvas.toDataURL("image/jpeg",0.7);
         $.ajax({
             url:$("button#answer_submit_button").attr('formaction'),//APIのURLはformaction属性に記述しておく。
             type:'post',

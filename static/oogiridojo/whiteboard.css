@@ -7,3 +7,11 @@ canvas#myCanvas{
 form#whiteboard_submit_form{
     text-align:center;
 }
+.color_black{color:#000000;}
+.color_white{color:#ffffff;}
+.color_red{color:#ee1111;}
+.color_green{color:#11ee11;}
+.color_blue{color:#1111ee;}
+.color_cyan{color:#11eeee;}
+.color_magenta{color:#ee11ee;}
+.color_yellow{color:#eeee11;}

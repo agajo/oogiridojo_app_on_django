@@ -6,15 +6,11 @@ var oldMidPt;
 var title;
 var color;
 var stroke;
-var colors;
-var index;
 
 init();
 
 function init() {
     canvas = document.getElementById("myCanvas");
-    index = 0;
-    colors = ["#828b20", "#b0ac31", "#cbc53d", "#fad779", "#f9e4ad", "#faf2db", "#563512", "#9b4a0b", "#d36600", "#fe8a00", "#f9a71f"];
 
     //check to see if we are running in a browser with touch support
     stage = new createjs.Stage(canvas);
@@ -29,9 +25,9 @@ function init() {
     stage.addEventListener("stagemousedown", handleMouseDown);
     stage.addEventListener("stagemouseup", handleMouseUp);
 
-    title = new createjs.Text("Click and Drag to draw", "36px Arial", "#777777");
-    title.x = 300;
-    title.y = 200;
+    title = new createjs.Text("ここに描く", "36px Arial", "#777777");
+    title.x = 60;
+    title.y = 130;
     stage.addChild(title);
 
     stage.addChild(drawingCanvas);
@@ -43,9 +39,15 @@ function handleMouseDown(event) {
     if (stage.contains(title)) {
         stage.clear();
         stage.removeChild(title);
+        //背景色を透明から白に
+        var bg_shape = new createjs.Shape();
+        bg_shape.graphics.f("white").dr(0,0,300,300);
+        stage.addChild(bg_shape);
+        stage.update();
+        stage.removeChild(bg_shape);
     }
-    color = colors[(index++) % colors.length];
-    stroke = Math.random() * 30 + 10 | 0;
+    color = "rgba(" + $("input[name=color]:checked").val() + "," + $("input[name=alpha]").val() + ")";
+    stroke = $("input[name=thickness]:checked").val();
     oldPt = new createjs.Point(stage.mouseX, stage.mouseY);
     oldMidPt = oldPt.clone();
     stage.addEventListener("stagemousemove", handleMouseMove);
