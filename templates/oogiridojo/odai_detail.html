@@ -8,7 +8,7 @@
 
 {% block main_content %}
     <section id="odai" class="odai_section">
-        <h1 class="odai_text">{{ odai.odai_text }}</h1>
+        <h1 class="odai_text">{{ odai.odai_text }}  <a href="{% url 'oogiridojo:whiteboard' odai.id %}"><button type="button" class="btn btn-primary">ホワボ</button></a></h1>
             <form id="answer_form" action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
                 {% csrf_token %}
 
