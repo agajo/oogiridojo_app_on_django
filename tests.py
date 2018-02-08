@@ -783,3 +783,48 @@ class TsukkomiGameTests(TestCase):
             'aid5':answer5.id
         })
         self.assertIn("空の",response.json()["error"])
+
+class AnswerSubmitWithImageTests(TestCase):
+    def test_answer_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"ほげええ"})
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))#この時点で一度回答一覧を取得
+        self.assertContains(response,"ほげええ")#回答の投稿ができている
+        self.assertNotContains(response,"<img")#画像がない
+        monkasei = Monkasei.objects.order_by("id").first()
+        default = monkasei.ningenryoku
+        c1.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        monkasei = Monkasei.objects.get(pk=monkasei.id)
+        self.assertEqual(monkasei.ningenryoku,default+5)#人間力が5増えている
+        response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
+        self.assertContains(response,"あんてき1")#回答の投稿ができている
+        self.assertContains(response,"<img")#画像がある
+
+    def test_answer_submit_and_create_monkasei(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        monkasei = Monkasei.objects.order_by("id").first()
+        response = c1.get(reverse("oogiridojo:mypage"))
+        self.assertContains(response,"あんてき1")#門下生が作られたことを確認したいだけ。もっといい方法あるかも。
+
+    def test_not_answer_submit_when_high_ningenryoku(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        monkasei = Monkasei.objects.order_by("id").first()
+        monkasei.ningenryoku=51
+        monkasei.save()
+        response = c1.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あんてき2", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        self.assertIn("人間力が高",response.json()["error"])
+
+    def test_too_long_answer_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        response = self.client.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あ"*3000, 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        self.assertIn("長すぎ",response.json()["error"])
+
+    def test_zero_length_answer_submit(self):
+        odai = Odai.objects.create(odai_text="oda")
+        response = self.client.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        self.assertIn("回答が空",response.json()["error"])
