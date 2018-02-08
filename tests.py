@@ -62,6 +62,20 @@ class IndexViewTests(TestCase):
         self.assertQuerysetEqual(response.context['yoi_monkasei_list'],['<Monkasei: mon2>', '<Monkasei: mon1>'])
         self.assertQuerysetEqual(response.context['great_monkasei_list'],['<Monkasei: mon2>', '<Monkasei: mon1>'])
 
+    def test_if_image(self):
+        odai = Odai.objects.create(id=1, odai_text="test_index_rankings")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, free_vote_score=1, monkasei_id=1, img_datauri="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
+        response = self.client.get(reverse("oogiridojo:index"))
+        self.assertContains(response, "<img")
+
+    def test_no_image(self):
+        odai = Odai.objects.create(id=1, odai_text="test_index_rankings")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, free_vote_score=1, monkasei_id=1)
+        response = self.client.get(reverse("oogiridojo:index"))
+        self.assertNotContains(response, "<img")
+
 class OdaiViewAnswersTests(TestCase):
     def test_no_answers(self):
         odai = Odai.objects.create(odai_text="odaoda")
@@ -153,7 +167,7 @@ class OdaiViewAnswersTests(TestCase):
         odai = Odai.objects.create(odai_text="oda")
         monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id, monkasei_id=1)
-        response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer.id, 'tsukkomi_text':"このような句読点が少ない文章は文章の流れをつかみにくく読みづらいという欠点を持つが書く人はこの方が早く書けることもあるので「句読点が多い文章」よりは出現しやすくさらにパソコンやワープロなどで書き印刷する場合は紙のスペースの節約になり省資源にも多少は貢献すると思われるのみならず最近の女子高生が携帯電話からブログに書いた文章においては句読点がないのが普通だったりするんだけれども読みやすさ第一を心がける場合においては句読点をつけすぎなさすぎないことはやめましょうといいながらも蓮実重彦という東大総長にもなったとても偉い先生や吉田健一というとても偉い英文学者はこの調子で本を二三冊書いていたりするのであながち書き手に問題があるというよりはそれを読む方の能力にかかっているとも言え読みにくいんだよバーカとか言ったらおのれの読解力が低いんじゃと逆襲されることもあるからちょっと注意した方がいいよとのアドバイスを書き込もうとしてよく考えてみたら流石に蓮実も吉田も句点は打ってたなあと思い出し結局こういう文章は読みにくいなあとの当たり前の結論に達したところでこういう文章はやめた方がいいねと再度念を押しておくことにするが僭越ながら句読点が少ない文章というのは一般論的に苛々するものであってかといって多すぎるのも否めないとも言い切れもしないでもないがそうだからといって世の中の老若男女にとっては"})
+        response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer.id, 'tsukkomi_text':"あ"*3000})
         self.assertEqual(response.json()["error"],"error")
 
     def test_tsukkomi_submit_and_modify_answer_date(self):
@@ -178,7 +192,7 @@ class OdaiViewAnswersTests(TestCase):
     def test_add_a_too_long_answer(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"日本国民は、正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたつて自由のもたらす恵沢を確保し、政府の行為によつて再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。そもそも国政は、国民の厳粛な信託によるものであつて、その権威は国民に由来し、その権力は国民の代表者がこれを行使し、その福利は国民がこれを享受する。これは人類普遍の原理であり、この憲法は、かかる原理に基くものである。われらは、これに反する一切の憲法、法令及び詔勅を排除する。日本国民は、恒久の平和を念願し、人間相互の関係を支配する崇高な理想を深く自覚するのであつて、平和を愛する諸国民の公正と信義に信頼して、われらの安全と生存を保持しようと決意した。われらは、平和を維持し、専制と隷従、圧迫と偏狭を地上から永遠に除去しようと努めてゐる国際社会において、名誉ある地位を占めたいと思ふ。われらは、全世界の国民が、ひとしく恐怖と欠乏から免かれ、平和のうちに生存する権利を有することを確認する。われらは、いづれの国家も、自国のことのみに専念して他国を無視してはならないのであつて、政治道徳の法則は、普遍的なものであり、この法則に従ふことは、自国の主権を維持し、他国と対等関係に立たうとする各国の責務であると信ずる。日本国民は、国家の名誉にかけ、全力をあげてこの崇高な理想と目的を達成することを誓ふ。"})
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あ"*3000})
         #self.assertRedirects(response,reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         #↑このチェックを実行すると、そこでmessageが消費されるのか、下のmessageチェックが通らなくなる。下の方が大事なのでRedirectチェックはしないことにします。
         response2 = c1.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
@@ -222,6 +236,20 @@ class OdaiViewAnswersTests(TestCase):
         c.login(username="judger", password="hoge")
         response = c.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertNotContains(response,'ジャッジ</a>')
+
+    def test_if_image(self):
+        odai = Odai.objects.create(id=1, odai_text="test_index_rankings")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, free_vote_score=1, monkasei_id=1, img_datauri="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
+        response = self.client.get(reverse("oogiridojo:odai", kwargs={'pk':odai.id}))
+        self.assertContains(response, "<img")
+
+    def test_no_image(self):
+        odai = Odai.objects.create(id=1, odai_text="test_index_rankings")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        ans1 = Answer.objects.create(answer_text="ans1", odai_id=1, free_vote_score=1, monkasei_id=1)
+        response = self.client.get(reverse("oogiridojo:odai", kwargs={'pk':odai.id}))
+        self.assertNotContains(response, "<img")
 
 class JudgementViewTests(TestCase):
     def test_no_permission(self):
@@ -305,7 +333,7 @@ class JudgementViewTests(TestCase):
         user.user_permissions.add(permission)
         c = Client()
         c.login(username="judger", password="hoge")
-        response = c.post(reverse("oogiridojo:judgement_submit"), {'answer_id':answer.id, 'judgement_text':"このような句読点が少ない文章は文章の流れをつかみにくく読みづらいという欠点を持つが書く人はこの方が早く書けることもあるので「句読点が多い文章」よりは出現しやすくさらにパソコンやワープロなどで書き印刷する場合は紙のスペースの節約になり省資源にも多少は貢献すると思われるのみならず最近の女子高生が携帯電話からブログに書いた文章においては句読点がないのが普通だったりするんだけれども読みやすさ第一を心がける場合においては句読点をつけすぎなさすぎないことはやめましょうといいながらも蓮実重彦という東大総長にもなったとても偉い先生や吉田健一というとても偉い英文学者はこの調子で本を二三冊書いていたりするのであながち書き手に問題があるというよりはそれを読む方の能力にかかっているとも言え読みにくいんだよバーカとか言ったらおのれの読解力が低いんじゃと逆襲されることもあるからちょっと注意した方がいいよとのアドバイスを書き込もうとしてよく考えてみたら流石に蓮実も吉田も句点は打ってたなあと思い出し結局こういう文章は読みにくいなあとの当たり前の結論に達したところでこういう文章はやめた方がいいねと再度念を押しておくことにするが僭越ながら句読点が少ない文章というのは一般論的に苛々するものであってかといって多すぎるのも否めないとも言い切れもしないでもないがそうだからといって世の中の老若男女にとっては", 'judgement_score':1})
+        response = c.post(reverse("oogiridojo:judgement_submit"), {'answer_id':answer.id, 'judgement_text':"あ"*3000, 'judgement_score':1})
         self.assertEqual(response.json()["error"],"error")
 
 class AudioSessionTests(TestCase):
@@ -690,7 +718,7 @@ class AnswerGameTests(TestCase):
 
     def test_too_long_answer_submit(self):
         odai = Odai.objects.create(odai_text="oda")
-        response = self.client.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':"このような句読点が少ない文章は文章の流れをつかみにくく読みづらいという欠点を持つが書く人はこの方が早く書けることもあるので「句読点が多い文章」よりは出現しやすくさらにパソコンやワープロなどで書き印刷する場合は紙のスペースの節約になり省資源にも多少は貢献すると思われるのみならず最近の女子高生が携帯電話からブログに書いた文章においては句読点がないのが普通だったりするんだけれども読みやすさ第一を心がける場合においては句読点をつけすぎなさすぎないことはやめましょうといいながらも蓮実重彦という東大総長にもなったとても偉い先生や吉田健一というとても偉い英文学者はこの調子で本を二三冊書いていたりするのであながち書き手に問題があるというよりはそれを読む方の能力にかかっているとも言え読みにくいんだよバーカとか言ったらおのれの読解力が低いんじゃと逆襲されることもあるからちょっと注意した方がいいよとのアドバイスを書き込もうとしてよく考えてみたら流石に蓮実も吉田も句点は打ってたなあと思い出し結局こういう文章は読みにくいなあとの当たり前の結論に達したところでこういう文章はやめた方がいいねと再度念を押しておくことにするが僭越ながら句読点が少ない文章というのは一般論的に苛々するものであってかといって多すぎるのも否めないとも言い切れもしないでもないがそうだからといって世の中の老若男女にとってはあんてき3"})
+        response = self.client.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':"あ"*3000})
         self.assertIn("長すぎ",response.json()["error"])
 
     def test_zero_length_answer_submit(self):
@@ -751,7 +779,7 @@ class TsukkomiGameTests(TestCase):
         response = self.client.post(reverse("oogiridojo:tsukkomi_game_submit"), {
             'answer1':"つっこみ1",
             'answer2':"あんてき2",
-            'answer3':"このような句読点が少ない文章は文章の流れをつかみにくく読みづらいという欠点を持つが書く人はこの方が早く書けることもあるので「句読点が多い文章」よりは出現しやすくさらにパソコンやワープロなどで書き印刷する場合は紙のスペースの節約になり省資源にも多少は貢献すると思われるのみならず最近の女子高生が携帯電話からブログに書いた文章においては句読点がないのが普通だったりするんだけれども読みやすさ第一を心がける場合においては句読点をつけすぎなさすぎないことはやめましょうといいながらも蓮実重彦という東大総長にもなったとても偉い先生や吉田健一というとても偉い英文学者はこの調子で本を二三冊書いていたりするのであながち書き手に問題があるというよりはそれを読む方の能力にかかっているとも言え読みにくいんだよバーカとか言ったらおのれの読解力が低いんじゃと逆襲されることもあるからちょっと注意した方がいいよとのアドバイスを書き込もうとしてよく考えてみたら流石に蓮実も吉田も句点は打ってたなあと思い出し結局こういう文章は読みにくいなあとの当たり前の結論に達したところでこういう文章はやめた方がいいねと再度念を押しておくことにするが僭越ながら句読点が少ない文章というのは一般論的に苛々するものであってかといって多すぎるのも否めないとも言い切れもしないでもないがそうだからといって世の中の老若男女にとってはあんてき3あんてき3",
+            'answer3':"あ"*3000,
             'answer4':"あんてき3",
             'answer5':"あんてき3",
             'aid1':answer2.id,
