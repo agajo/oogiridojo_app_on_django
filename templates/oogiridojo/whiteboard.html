@@ -16,8 +16,10 @@
     {# 後で必要になる情報をhiddenに置いとく。csrf_tokenとodai_id #}
     {% csrf_token %}
     <input id="odai_id_input" type="hidden" name="odai_id" value="{{ odai.id }}">
-    {# canvas #}
-    <canvas id="myCanvas" width="300" height="300">使ってるやつこれ、非対応ブラウザですね…ブラウザなんとかしてください…すいません…</canvas>
+    <div id="html_canvas">
+        {# canvas #}
+        <canvas id="myCanvas" width="300" height="300">使ってるやつこれ、非対応ブラウザですね…ブラウザなんとかしてください…すいません…</canvas>
+    </div>
     {# 色とか太さとか #}
     <p>
     色：

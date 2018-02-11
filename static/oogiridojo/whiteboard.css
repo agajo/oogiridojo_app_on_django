@@ -7,6 +7,9 @@ canvas#myCanvas{
 form#whiteboard_submit_form{
     text-align:center;
 }
+div#html_canvas{
+    text-align:center;
+}
 .color_black{color:#000000;}
 .color_white{color:#ffffff;}
 .color_red{color:#ee1111;}
