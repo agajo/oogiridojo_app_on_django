@@ -6,7 +6,7 @@ import datetime
 from django.db.models import Max, Sum, Count
 
 class Odai(models.Model):
-    odai_text = models.CharField(max_length=100)
+    odai_text = models.CharField(max_length=200)
     example_text = models.CharField(max_length = 50)
     creation_date = models.DateTimeField('date created', default=timezone.now)
     def __str__(self):
