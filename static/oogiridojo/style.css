@@ -64,4 +64,10 @@ div.answer_image{
 div.contact{
   text-align:center;
   margin:15px;
+  font-size:0.8em;
+  color:#888888;
+}
+div.contact a{
+  color:#888888;
+  text-decoration:underline;
 }
