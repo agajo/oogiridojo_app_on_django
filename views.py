@@ -328,3 +328,6 @@ def answer_submit_with_image(request):
         response = JsonResponse({"error":"人間力が高すぎます。別タブで下げてきてください。このタブで移動すると絵が消えます。"})
     response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
     return response
+
+class OdaiListView(generic.ListView):
+    model = Odai

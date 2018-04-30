@@ -41,6 +41,8 @@
                     お題一覧
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'oogiridojo:odai_list' %}">お題一覧</a>
+                    <div class="dropdown-divider"></div>
                     {% for odai in odais %}
                         <a class="dropdown-item" href="{% url 'oogiridojo:odai' odai.id %}">{{ odai.odai_text }}</a>
                     {% endfor %}
