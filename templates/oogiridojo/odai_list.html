@@ -15,7 +15,7 @@
 {% block main_content %}
 <h1 id="ranking_title" class="element_title">{% block show_page_title %}お題一覧{% endblock %}</h1>
 <ul>
-  {% for odai in odai_list %}
+  {% for odai in odai_list reversed %}
   <li><a href="{% url 'oogiridojo:odai' odai.id %}">{{ odai }}</a></li>
 
   {% empty %}
