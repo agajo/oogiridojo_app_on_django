@@ -38,7 +38,7 @@ class OdaiView(generic.DetailView):
     model = Odai
     #templateはデフォルトでoogiridojo/odai_detail.htmlが使われる。
 
-class JudgementView(PermissionRequiredMixin, generic.DetailView):
+class JudgementView(PermissionRequiredMixin, generic.DetailView):#2018-05-29既に使ってないので廃止予定
     permission_required = 'oogiridojo.add_judgement'
     # oogiridojo|judgement|Can add judgement は oogiridojo.add_judgement と書くらしいね。どこで定義されてるんだ。
     model = Odai
@@ -48,12 +48,13 @@ class JudgerView(PermissionRequiredMixin, generic.TemplateView):
     permission_required = 'oogiridojo.add_judgement'
     template_name = 'oogiridojo/judger.html'
     def get_context_data(self, **kwargs):
-        countall = Judgement.objects.count()
+        judgements = Judgement.objects.order_by("-id")[:100]
+        countall = judgements.count()
         if(countall == 0):
             countall = 1#これが実行される時、値には意味がないので、なんでもいい。0除算を防いでるだけ。
-        count1 = Judgement.objects.filter(judgement_score=1).count()
-        count2 = Judgement.objects.filter(judgement_score=2).count()
-        count3 = Judgement.objects.filter(judgement_score=3).count()
+        count1 = len([j for j in judgements if j.judgement_score==1])
+        count2 = len([j for j in judgements if j.judgement_score==2])
+        count3 = len([j for j in judgements if j.judgement_score==3])
         ratio1 = count1/countall
         ratio2 = count2/countall
         ratio3 = count3/countall
