@@ -48,7 +48,7 @@ class JudgerView(PermissionRequiredMixin, generic.TemplateView):
     permission_required = 'oogiridojo.add_judgement'
     template_name = 'oogiridojo/judger.html'
     def get_context_data(self, **kwargs):
-        judgements = Judgement.objects.order_by("-id")[:100]
+        judgements = Judgement.objects.order_by("-id")[:300]
         countall = judgements.count()
         if(countall == 0):
             countall = 1#これが実行される時、値には意味がないので、なんでもいい。0除算を防いでるだけ。
