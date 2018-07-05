@@ -75,25 +75,25 @@ class YoiView(generic.ListView):
     model = Answer
     template_name = "oogiridojo/yoi_ranking.html"
     def get_queryset(self):
-        return Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=7)).order_by('-free_vote_score')[:30]
+        return Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=7)).order_by('-free_vote_score')[:300]
 
 class GreatView(generic.ListView):
     model = Judgement
     template_name = "oogiridojo/great_answers.html"
     def get_queryset(self):
-        return Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:30]
+        return Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:300]
 
 class RecentAnswersView(generic.ListView):
     model = Answer
     template_name = "oogiridojo/recent_answers.html"
     def get_queryset(self):
-        return Answer.objects.order_by("-creation_date")[:30]
+        return Answer.objects.order_by("-creation_date")[:300]
 
 class RecentTsukkomiAnswersView(generic.ListView):
     model = Answer
     template_name = "oogiridojo/recent_tsukkomi_answers.html"
     def get_queryset(self):
-        return Answer.objects.filter(tsukkomi__isnull = False).annotate(tsukkomi_newest = Max('tsukkomi__creation_date')).order_by('-tsukkomi_newest')[:30]
+        return Answer.objects.filter(tsukkomi__isnull = False).annotate(tsukkomi_newest = Max('tsukkomi__creation_date')).order_by('-tsukkomi_newest')[:300]
 
 def answer_submit(request):
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
