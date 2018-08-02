@@ -15,3 +15,7 @@ def rname():
     for i in range(leng):
         firs = firs + rkatakana()
     return firs+rfamilast()+" "+rkatakana()+rkatakana()+rfirslast()
+
+great_monkasei_days = 30
+yoi_monkasei_days = 30
+yoi_answer_days = 15

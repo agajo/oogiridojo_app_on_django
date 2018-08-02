@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 import datetime
+from .functions import great_monkasei_days, yoi_monkasei_days, yoi_answer_days
 
 # Create your models here.
 from django.db.models import Max, Sum, Count
@@ -29,11 +30,11 @@ class Monkasei(models.Model):
     def __str__(self):
         return self.name
     def recent_free_vote_score(self):
-        return self.answer_set.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=14)).aggregate(score=Sum('free_vote_score'))['score']
+        return self.answer_set.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=yoi_monkasei_days)).aggregate(score=Sum('free_vote_score'))['score']
         #adminとmypageで使用。ランキング表示にも使いたかったけど、このpythonサイドの情報を元にしたSQLは発行できない。
         #同じ理由で、adminでもこの点数をもとに並び替えはできない。
     def recent_great_answer_count(self):
-        return self.answer_set.filter(judgement__creation_date__gte = timezone.now() - datetime.timedelta(days=14), judgement__judgement_score__exact = 3).aggregate(great_count = Count('judgement'))['great_count']
+        return self.answer_set.filter(judgement__creation_date__gte = timezone.now() - datetime.timedelta(days=great_monkasei_days), judgement__judgement_score__exact = 3).aggregate(great_count = Count('judgement'))['great_count']
 
 class Answer(models.Model):
     odai = models.ForeignKey(Odai, on_delete=models.CASCADE)

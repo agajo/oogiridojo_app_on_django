@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 import datetime
 import random
-from .functions import rname
+from .functions import rname, great_monkasei_days, yoi_monkasei_days, yoi_answer_days
 
 # Create your views here.
 
@@ -23,9 +23,9 @@ class IndexView(generic.TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         context['odai'] = Odai.objects.order_by('-id').first()
         context['judgement_list'] = Judgement.objects.filter(judgement_score__exact = 3).order_by('-id')[:5]
-        context['answer_list'] = Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=7)).order_by('-free_vote_score')[:5]
-        context['great_monkasei_list'] = Monkasei.objects.filter(answer__judgement__creation_date__gte = timezone.now() - datetime.timedelta(days=14), answer__judgement__judgement_score__exact = 3).annotate(great_count = Count('answer__judgement'), great_newest = Max('answer__judgement__creation_date')).order_by('-great_count','great_newest')[:2]
-        monkaseis = Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=14)).annotate(free_vote_score=Sum('answer__free_vote_score')).order_by('-free_vote_score')[:2]
+        context['answer_list'] = Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=yoi_answer_days)).order_by('-free_vote_score')[:5]
+        context['great_monkasei_list'] = Monkasei.objects.filter(answer__judgement__creation_date__gte = timezone.now() - datetime.timedelta(days=great_monkasei_days), answer__judgement__judgement_score__exact = 3).annotate(great_count = Count('answer__judgement'), great_newest = Max('answer__judgement__creation_date')).order_by('-great_count','great_newest')[:2]
+        monkaseis = Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=yoi_monkasei_days)).annotate(free_vote_score=Sum('answer__free_vote_score')).order_by('-free_vote_score')[:2]
         #こんな風にannotate使って、後から処理したフィールド(プロパティ・属性)加えられるんだね〜
         #filterをannotateの前に入れることで、MonkaseiだけではなくAnswerもフィルタできるらしい。なんか直感と違う。
         for monkasei in monkaseis:
@@ -75,7 +75,7 @@ class YoiView(generic.ListView):
     model = Answer
     template_name = "oogiridojo/yoi_ranking.html"
     def get_queryset(self):
-        return Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=7)).order_by('-free_vote_score')[:300]
+        return Answer.objects.filter(creation_date__gte = timezone.now() - datetime.timedelta(days=yoi_answer_days)).order_by('-free_vote_score')[:300]
 
 class GreatView(generic.ListView):
     model = Judgement
@@ -190,7 +190,7 @@ class MonkaseiYoiRankingView(generic.ListView):
     model = Monkasei
     template_name = "oogiridojo/monkasei_yoi_ranking.html"
     def get_queryset(self):
-        monkaseis = Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=14)).annotate(free_vote_score=Sum('answer__free_vote_score')).order_by('-free_vote_score')[:3]
+        monkaseis = Monkasei.objects.filter(answer__creation_date__gte = timezone.now() - datetime.timedelta(days=yoi_monkasei_days)).annotate(free_vote_score=Sum('answer__free_vote_score')).order_by('-free_vote_score')[:3]
         #こんな風にannotate使って、後から処理したフィールド(プロパティ・属性)加えられるんだね〜
         #filterをannotateの前に入れることで、MonkaseiだけではなくAnswerもフィルタできるらしい。なんか直感と違う。
         #model側で先にfree_vote_scoreフィールド作ろうとしたけど、そういうpythonサイドで先に処理した情報はSQLに反映できない。
@@ -203,7 +203,7 @@ class MonkaseiGreatRankingView(generic.ListView):
     model = Monkasei
     template_name = "oogiridojo/monkasei_great_ranking.html"
     def get_queryset(self):
-        return Monkasei.objects.filter(answer__judgement__creation_date__gte = timezone.now() - datetime.timedelta(days=14), answer__judgement__judgement_score__exact = 3).annotate(great_count = Count('answer__judgement'), great_newest = Max('answer__judgement__creation_date')).order_by('-great_count','great_newest')[:3]
+        return Monkasei.objects.filter(answer__judgement__creation_date__gte = timezone.now() - datetime.timedelta(days=great_monkasei_days), answer__judgement__judgement_score__exact = 3).annotate(great_count = Count('answer__judgement'), great_newest = Max('answer__judgement__creation_date')).order_by('-great_count','great_newest')[:3]
     #最近の3点ジャッジが多い順
     #同数の場合は、先にそのスコアに達した順、つまり、最後の3点獲得の時刻が小さい順
     #filter関数をチェインするといらんINNER JOINが発生してCOUNTがおかしくなります。一つのfilter内に複数条件書こう。
