@@ -4,6 +4,8 @@ from .santenbot import make_santen_picture
 import random
 from django.db.models import Count
 from ...models import Odai, Answer, Judgement
+import tweepy
+from .twitter_secrets import consumer_key, consumer_secret, access_token, access_token_secret
 
 class Command(BaseCommand):
   help = "makes Santenbot tweet"
@@ -18,3 +20,9 @@ class Command(BaseCommand):
       img_uri = ""
     image = make_santen_picture(judgement.answer.odai.odai_text, judgement.answer.answer_text, img_uri) 
     image.save("./santenbot_img.png")
+
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tweepy.API(auth)
+    text = judgement.answer.odai.odai_text + " http://oka-ryunoske.work/oogiridojo/odai/" + str(judgement.answer.odai.id) + "/#answer_id_" + str(judgement.answer.id)
+    api.update_with_media("./santenbot_img.png", status=text)
