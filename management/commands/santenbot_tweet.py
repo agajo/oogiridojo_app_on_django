@@ -24,5 +24,5 @@ class Command(BaseCommand):
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
-    text = judgement.answer.odai.odai_text + " http://oka-ryunoske.work/oogiridojo/odai/" + str(judgement.answer.odai.id) + "/#answer_id_" + str(judgement.answer.id)
+    text = "3点。"+judgement.judgement_text + " http://oka-ryunoske.work/oogiridojo/odai/" + str(judgement.answer.odai.id) + "/#answer_id_" + str(judgement.answer.id)
     api.update_with_media("./santenbot_img.png", status=text)
