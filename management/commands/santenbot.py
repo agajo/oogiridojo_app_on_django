@@ -12,9 +12,9 @@ def make_santen_picture(odai,answer,answer_picture=""):
     image_offset = 300 - 10 #画像の縦サイズ-「回答：」の縦幅
   im = Image.new("RGB",(650,image_offset+275),"white")
   draw = ImageDraw.Draw(im)
-  fnt  = ImageFont.truetype('./management/commands/sawarabi-mincho-medium.ttf',20)
-  fnt2 = ImageFont.truetype('./management/commands/sawarabi-mincho-medium.ttf',15)
-  fnt3 = ImageFont.truetype('./management/commands/sawarabi-mincho-medium.ttf',13)
+  fnt  = ImageFont.truetype('./management/commands/Kokoro.otf',22)
+  fnt2 = ImageFont.truetype('./management/commands/Kokoro.otf',15)
+  fnt3 = ImageFont.truetype('./management/commands/Kokoro.otf',13)
 
   #お題描画
   draw.rectangle(((10,10),(640,110)),fill="pink")
