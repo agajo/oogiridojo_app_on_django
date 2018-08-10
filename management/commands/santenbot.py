@@ -36,7 +36,7 @@ def make_santen_picture(odai,answer,answer_picture=""):
   draw.text((10+(630-answer_size[0])/2,130+image_offset+(130-answer_size[1])/2),answer_texts,font=fnt,align="center",fill="#111122")
 
   #サイト情報描画
-  draw.text((440,image_offset+250),"oka-ryunoske.work/oogiridojo",font=fnt3,fill="#999999")
+  draw.text((440,image_offset+250),"oka-ryunoske.work/oogiridojo/",font=fnt3,fill="#999999")
 
   #出力
   return im
