@@ -2,4 +2,6 @@
 *.pyc
 *.mp3
 *.wav
-
+*.ttf
+santenbot_img.png
+*twitter_secrets.py
