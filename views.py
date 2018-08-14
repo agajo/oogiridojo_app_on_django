@@ -67,8 +67,8 @@ class JudgerView(PermissionRequiredMixin, generic.TemplateView):
                         "ratio2":ratio2*100,
                         "ratio3":ratio3*100,
         })
-        context["answer_list"] = Answer.objects.filter(creation_date__gte = timezone.now()-datetime.timedelta(days=135)).filter(judgement__isnull = True).order_by("-id")[:60]
-        #135日という日数に意味はありません。古すぎる奴を表示したくないだけ。これ以上古い奴はジャッジ対象に表示されなくなる。
+        context["answer_list"] = Answer.objects.filter(creation_date__gte = datetime.datetime(2018,4,1,tzinfo=timezone.utc)).filter(judgement__isnull = True).order_by("id")[:10]
+        #2018,4,1という日付に意味はありません。古すぎる奴を表示したくないだけ。これ以上古い奴はジャッジ対象に表示されなくなる。
         return context
 
 class YoiView(generic.ListView):
