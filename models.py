@@ -25,7 +25,7 @@ class Odai(models.Model):
 
 class Monkasei(models.Model):
     name = models.CharField(max_length=30)
-    ningenryoku = models.PositiveIntegerField(default=20)
+    ningenryoku = models.PositiveIntegerField(default=0)
     creation_date = models.DateTimeField('date created', default=timezone.now)
     def __str__(self):
         return self.name
