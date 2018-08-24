@@ -44,6 +44,7 @@ class Answer(models.Model):
     creation_date = models.DateTimeField('date created', default=timezone.now)
     modified_date = models.DateTimeField('date modified', default=timezone.now)
     free_vote_score = models.PositiveIntegerField(default=0)
+    client_ip = models.CharField(max_length=45, blank=True)
     def __str__(self):
         return self.answer_text
 
