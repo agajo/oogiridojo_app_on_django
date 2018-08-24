@@ -102,7 +102,7 @@ def answer_submit(request):
         monkasei = Monkasei(name = rname())
         monkasei.save()
     if(monkasei.ningenryoku<=50):
-        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
+        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
         try:
             answer.full_clean()
             answer.save()
@@ -237,9 +237,9 @@ def answer_game_submit(request):
         monkasei = Monkasei(name = rname())
         monkasei.save()
     if(monkasei.ningenryoku<=50):
-        answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
-        answer2 = Answer(answer_text = request.POST['answer2'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
-        answer3 = Answer(answer_text = request.POST['answer3'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id)
+        answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
+        answer2 = Answer(answer_text = request.POST['answer2'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
+        answer3 = Answer(answer_text = request.POST['answer3'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
         try:
             answer1.full_clean()
             answer2.full_clean()
@@ -316,7 +316,7 @@ def answer_submit_with_image(request):
         monkasei = Monkasei(name = rname())
         monkasei.save()
     if(monkasei.ningenryoku<=50):
-        answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri = request.POST['datauri'])
+        answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri = request.POST['datauri'], client_ip = request.META["REMOTE_ADDR"])
         try:
             answer1.full_clean()
             answer1.save()
