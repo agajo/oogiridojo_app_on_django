@@ -67,8 +67,25 @@ class JudgerView(PermissionRequiredMixin, generic.TemplateView):
                         "ratio2":ratio2*100,
                         "ratio3":ratio3*100,
         })
-        context["answer_list"] = Answer.objects.filter(creation_date__gte = datetime.datetime(2018,4,1,tzinfo=timezone.utc)).filter(judgement__isnull = True).order_by("id")[:10]
+        querySet = Answer.objects.filter(creation_date__gte = datetime.datetime(2018,4,1,tzinfo=timezone.utc)).filter(judgement__isnull = True).order_by("id")[:300]
         #2018,4,1という日付に意味はありません。古すぎる奴を表示したくないだけ。これ以上古い奴はジャッジ対象に表示されなくなる。
+        # ↓↓↓ 同じ人からの連投があった時に、極力違う人の投稿をジャッジするための処理↓↓↓
+        answer_list = []
+        for answer in querySet:
+          if answer_list==[]:
+            answer_list.append(answer)
+          else:
+            same_user_count = 0
+            for appended_answer in answer_list:
+              if appended_answer.monkasei == answer.monkasei or (answer.client_ip != "" and appended_answer.client_ip == answer.client_ip):
+                same_user_count = same_user_count +1
+                # answer_listに「同じ人」による投稿がいくつあるかカウントしています。
+                # 「同じ人」とは、IPが同じか、monkaseiが同じ。
+            if same_user_count < 3:# 「同じ人」の回答が3個ある時は、answer_listに加えない。
+              answer_list.append(answer)
+            if len(answer_list) >= 20:
+              break;# answer_listが20個に達したら、querySetの精査をやめる。
+        context["answer_list"] = answer_list
         return context
 
 class YoiView(generic.ListView):
