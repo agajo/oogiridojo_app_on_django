@@ -419,6 +419,45 @@ class JudgerViewTests(TestCase):
         self.assertNotContains(response, "judgement_form")
         # formが表示されないことを、formのclassの名前でチェックしてます。
 
+    def test_not_show_answer_when_same_three_monkasei(self):
+        odai = Odai.objects.create(odai_text="ジャッジあり2")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        monkasei2 = Monkasei.objects.create(id=2, name="mon2")
+        answer1 = Answer.objects.create(answer_text="これ", odai_id = odai.id, monkasei_id=2)
+        answer1 = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
+        answer2 = Answer.objects.create(answer_text="ひげ", odai_id = odai.id, monkasei_id=1)
+        answer3 = Answer.objects.create(answer_text="あざ", odai_id = odai.id, monkasei_id=1)
+        answer4 = Answer.objects.create(answer_text="らし", odai_id = odai.id, monkasei_id=1)
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:judger'))
+        self.assertContains(response,"あご")
+        self.assertContains(response,"あざ")# client_ipが空欄で一致してる時は「同じ人」とは見做さないので、「あざ」は出るはず。
+        self.assertNotContains(response,"らし")
+
+    def test_not_show_answer_when_same_three_ip(self):
+        odai = Odai.objects.create(odai_text="ジャッジあり2")
+        monkasei1 = Monkasei.objects.create(id=1, name="mon1")
+        monkasei2 = Monkasei.objects.create(id=2, name="mon2")
+        monkasei3 = Monkasei.objects.create(id=3, name="mon3")
+        monkasei4 = Monkasei.objects.create(id=4, name="mon4")
+        answer1 = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1, client_ip="1.1.1.1")
+        answer2 = Answer.objects.create(answer_text="ひげ", odai_id = odai.id, monkasei_id=2, client_ip="1.1.1.1")
+        answer3 = Answer.objects.create(answer_text="あざ", odai_id = odai.id, monkasei_id=3, client_ip="1.1.1.1")
+        answer4 = Answer.objects.create(answer_text="らし", odai_id = odai.id, monkasei_id=4, client_ip="1.1.1.1")
+        user = User.objects.create_user("judger", password="hoge")
+        permission = Permission.objects.get(codename='add_judgement')
+        user.user_permissions.add(permission)
+        c = Client()
+        c.login(username="judger", password="hoge")
+        response = c.get(reverse('oogiridojo:judger'))
+        self.assertContains(response,"あご")
+        self.assertContains(response,"あざ")
+        self.assertNotContains(response,"らし")
+
 class YoiRankingViewTests(TestCase):
     def test_ranking_context(self):
         odai = Odai.objects.create(odai_text="良いランキングのテスト")
