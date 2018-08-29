@@ -45,6 +45,8 @@ function handleMouseDown(event) {
         stage.addChild(bg_shape);
         stage.update();
         stage.removeChild(bg_shape);
+        $("div#html_canvas").append('<input type="hidden" id="canvas_drawn">');
+        // ↑何かが書かれたという証拠を残す。この要素がいない時は、絵を投稿しない。
     }
     color = "rgba(" + $("input[name=color]:checked").val() + "," + $("input[name=alpha]").val() + ")";
     stroke = $("input[name=thickness]:checked").val();

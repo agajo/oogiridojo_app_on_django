@@ -16,6 +16,7 @@
     {# 後で必要になる情報をhiddenに置いとく。csrf_tokenとodai_id #}
     {% csrf_token %}
     <input id="odai_id_input" type="hidden" name="odai_id" value="{{ odai.id }}">
+    <input type="hidden" id="destination_input" value = "{% url 'oogiridojo:odai' odai.id %}">
     <div id="html_canvas">
         {# canvas #}
         <canvas id="myCanvas" width="300" height="300">使ってるやつこれ、非対応ブラウザですね…ブラウザなんとかしてください…すいません…</canvas>
@@ -46,12 +47,12 @@
     {# 回答テキスト #}
     <div id='answer_text_row' class="row">
         <input id="answer_text_input" type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
-        <button id="answer_submit_button" type="button" class="answer_submit_button col-4 btn btn-danger btn-sm" formaction="{% url 'oogiridojo:answer_submit_with_image' %}">回答を投稿する</button>
+        <button id="answer_submit_button" type="button" class="answer_submit_button col-4 btn btn-danger btn-sm" formaction="{% url 'oogiridojo:answer_submit' %}">回答を投稿する</button>
     </div>
 {% endblock main_content %}
 
 {% block other_scripts %}
     <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
     <script src="{% static 'oogiridojo/whiteboard.js' %}"></script>
-    <script src="{% static 'oogiridojo/whiteboard_submit.js' %}"></script>
+    <script src="{% static 'oogiridojo/answer_submit.js' %}"></script>
 {% endblock %}

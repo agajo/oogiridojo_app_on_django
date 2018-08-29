@@ -111,7 +111,7 @@ class OdaiViewAnswersTests(TestCase):
         default_score=1
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=default_score, odai_id = odai.id, monkasei_id=1)
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaa"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaa", 'datauri':""})
         response = c1.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
         self.assertEqual(response.json()["newscore"], default_score+1)
 
@@ -119,8 +119,8 @@ class OdaiViewAnswersTests(TestCase):
         odai = Odai.objects.create(odai_text="odaaaaaaaai")
         c1 = Client()
         c2 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaa"})
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaa", 'datauri':""})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"iiiiii", 'datauri':""})
         monkasei = Monkasei.objects.order_by('id').first()
         default = monkasei.ningenryoku
         answer = Answer.objects.order_by("id").last()
@@ -131,9 +131,9 @@ class OdaiViewAnswersTests(TestCase):
     def test_cannot_vote_when_ningenryoku_zero(self):
         odai = Odai.objects.create(odai_text="odaaaaaaaai")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaa"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaa", 'datauri':""})
         c2 = Client()
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"iiiiii", 'datauri':""})
         monkasei = Monkasei.objects.order_by('id').first()
         monkasei.ningenryoku = 0
         monkasei.save()
@@ -144,7 +144,7 @@ class OdaiViewAnswersTests(TestCase):
     def test_cannot_vote_to_my_answer(self):
         odai = Odai.objects.create(odai_text="odaaaaaaaai")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"iiiiii", 'datauri':""})
         answer = Answer.objects.order_by("id").first()
         response = c1.post(reverse("oogiridojo:free_vote"), {'free_vote_button':answer.id})
         self.assertEqual(response.json()["newscore"],"自分の投稿です。")
@@ -181,44 +181,35 @@ class OdaiViewAnswersTests(TestCase):
 
     def test_add_an_answer_to_an_odai(self):
         odai = Odai.objects.create(odai_text="oda")
-        response = self.client.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき"})
-        #↑こいつのレスポンスコードは302が返る。
-        #redirectのレスポンスを受け取って、クライアントがそのURLに改めてリクエストを出すからね。
-        self.assertRedirects(response,reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
-        #なので、あらためてindexを取得し直す。
+        response = self.client.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき", 'datauri':""})
         response2 = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
         self.assertContains(response2,"あんてき")
 
     def test_add_a_too_long_answer(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あ"*3000})
-        #self.assertRedirects(response,reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
-        #↑このチェックを実行すると、そこでmessageが消費されるのか、下のmessageチェックが通らなくなる。下の方が大事なのでRedirectチェックはしないことにします。
-        response2 = c1.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
-        self.assertContains(response2,"長すぎます")
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あ"*3000, 'datauri':""})
+        self.assertIn("長すぎ",response.json()["error"])
 
     def test_ningenryoku_increase_when_answer_submit(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき", 'datauri':""})
         monkasei = Monkasei.objects.order_by("id").first()
         default = monkasei.ningenryoku
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき2"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき2", 'datauri':""})
         monkasei = Monkasei.objects.get(pk=monkasei.id)
         self.assertEqual(monkasei.ningenryoku,default+5)
 
     def test_cannot_submit_answer_when_ningenryoku_much(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき", 'datauri':""})
         monkasei = Monkasei.objects.order_by("id").first()
         monkasei.ningenryoku=51
         monkasei.save()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき2"})
-        #↑これのレスポンスは302が返るので、それに従ってクライアントからもっかいリクエストを投げる
-        response = c1.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
-        self.assertContains(response,"人間力が高すぎます。")
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき2", 'datauri':""})
+        self.assertIn("人間力が高",response.json()["error"])
 
     def test_show_judgement(self):
         odai = Odai.objects.create(odai_text="ジャッジあり")
@@ -522,10 +513,10 @@ class MypageViewTests(TestCase):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
         c2 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"uuuuuu"})
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"eeeeee"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaaa", 'datauri':""})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"iiiiii", 'datauri':""})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"uuuuuu", 'datauri':""})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"eeeeee", 'datauri':""})
         response = c1.get(reverse('oogiridojo:mypage'))
         self.assertContains(response,"aaaaaa")
         self.assertContains(response,"uuuuuu")
@@ -536,7 +527,7 @@ class MypageViewTests(TestCase):
     def test_mypage_name(self):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaaa", 'datauri':""})
         #answerを投稿することで、門下生としてのデータが作られる
         monkasei = Monkasei.objects.order_by('id').first()
         response = c1.get(reverse('oogiridojo:mypage'))
@@ -545,9 +536,9 @@ class MypageViewTests(TestCase):
     def test_mypage_score(self):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaaa", 'datauri':""})
         c2 = Client()
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaa"})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaa", 'datauri':""})
         answer = Answer.objects.order_by('id').first()
         answer.free_vote_score=143
         answer.save()
@@ -557,7 +548,7 @@ class MypageViewTests(TestCase):
     def test_mypage_not_calculate_old_answers(self):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaaa", 'datauri':""})
         monkasei = Monkasei.objects.order_by('id').first()
         answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=monkasei.id, free_vote_score=136)
         answer2 = Answer.objects.create(answer_text="ww", odai_id = odai.id, monkasei_id=monkasei.id, free_vote_score=123, creation_date="2010-10-10T03:03:03+09:00")
@@ -568,8 +559,8 @@ class MypageViewTests(TestCase):
     def test_mypage_great_count(self):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aa"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaaa", 'datauri':""})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aa", 'datauri':""})
         answer1 = Answer.objects.order_by('id').first()
         answer2 = Answer.objects.order_by('id').last()
         Judgement.objects.create(judgement_score=3, judgement_text="uuu", answer_id=answer1.id)
@@ -622,8 +613,8 @@ class MonkaseiYoiRankingViewTests(TestCase):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
         c2 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaaa", 'datauri':""})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"iiiiii", 'datauri':""})
         answers = Answer.objects.order_by('id')[:2]
         monkaseis = Monkasei.objects.order_by('id')[:2]
         #ポスグレは、こうやっていきなり作ったデータもid何になるかわからんので、「1」とか指定しないでいちいち取得します。
@@ -643,8 +634,8 @@ class MonkaseiYoiRankingViewTests(TestCase):
         odai = Odai.objects.create(odai_text="mypage view answers")
         c1 = Client()
         c2 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"aaaaaa"})
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"iiiiii"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaaa", 'datauri':""})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"iiiiii", 'datauri':""})
         monkaseis = Monkasei.objects.order_by('id')
         answer1 = Answer.objects.create(answer_text="uu", odai_id = odai.id, monkasei_id=monkaseis[0].id, free_vote_score=106)
         answer2 = Answer.objects.create(answer_text="ww", odai_id = odai.id, monkasei_id=monkaseis[0].id, free_vote_score=123, creation_date="2010-10-10T03:03:03+09:00")
@@ -710,7 +701,7 @@ class AnswerGameTests(TestCase):
     def test_diable_start_button_when_high_ningenryoku(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"あんてき"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき", 'datauri':""})
         monkasei = Monkasei.objects.order_by("id").first()
         monkasei.ningenryoku=51
         monkasei.save()
@@ -726,7 +717,7 @@ class AnswerGameTests(TestCase):
     def test_answer_submit(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"ほげええ"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"ほげええ", 'datauri':""})
         monkasei = Monkasei.objects.order_by("id").first()
         default = monkasei.ningenryoku
         c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
@@ -855,13 +846,13 @@ class AnswerSubmitWithImageTests(TestCase):
     def test_answer_submit(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer_text':"ほげええ"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"ほげええ", 'datauri':""})
         response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))#この時点で一度回答一覧を取得
         self.assertContains(response,"ほげええ")#回答の投稿ができている
         self.assertNotContains(response,"<img")#画像がない
         monkasei = Monkasei.objects.order_by("id").first()
         default = monkasei.ningenryoku
-        c1.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
         monkasei = Monkasei.objects.get(pk=monkasei.id)
         self.assertEqual(monkasei.ningenryoku,default+5)#人間力が5増えている
         response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
@@ -871,7 +862,7 @@ class AnswerSubmitWithImageTests(TestCase):
     def test_answer_submit_and_create_monkasei(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
         monkasei = Monkasei.objects.order_by("id").first()
         response = c1.get(reverse("oogiridojo:mypage"))
         self.assertContains(response,"あんてき1")#門下生が作られたことを確認したいだけ。もっといい方法あるかも。
@@ -879,19 +870,19 @@ class AnswerSubmitWithImageTests(TestCase):
     def test_not_answer_submit_when_high_ningenryoku(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
         monkasei = Monkasei.objects.order_by("id").first()
         monkasei.ningenryoku=51
         monkasei.save()
-        response = c1.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あんてき2", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき2", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
         self.assertIn("人間力が高",response.json()["error"])
 
     def test_too_long_answer_submit(self):
         odai = Odai.objects.create(odai_text="oda")
-        response = self.client.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"あ"*3000, 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        response = self.client.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あ"*3000, 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
         self.assertIn("長すぎ",response.json()["error"])
 
     def test_zero_length_answer_submit(self):
         odai = Odai.objects.create(odai_text="oda")
-        response = self.client.post(reverse("oogiridojo:answer_submit_with_image"), {'odai_id':odai.id, 'answer1':"", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
+        response = self.client.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"", 'datauri':'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'})
         self.assertIn("回答が空",response.json()["error"])

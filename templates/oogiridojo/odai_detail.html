@@ -1,4 +1,5 @@
 {% extends "oogiridojo/base.html" %}
+{% load static %}
 
 {% block other_metas %}
 <meta name="description" content="みんなでワイワイ大喜利をやるサイトです。登録やログインは不要です。ここでのお題は「{{ odai.odai_text }}」です。">
@@ -9,16 +10,15 @@
 {% block main_content %}
     <section id="odai" class="odai_section">
         <h1 class="odai_text">{{ odai.odai_text }}  <a href="{% url 'oogiridojo:whiteboard' odai.id %}"><button type="button" class="btn btn-primary">ホワボ</button></a></h1>
-            <form id="answer_form" action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
-                {% csrf_token %}
+        {% csrf_token %}
 
-                <div class="row"><!-- .row from here -->
-                <input type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
-                <input type="submit" class="answer_submit_button col-4 btn btn-danger btn-sm" value="回答を投稿する">
-                </div><!-- end of .row -->
+        <div id="answer_text_row" class="row"><!-- .row from here -->
+        <input type="text" id="answer_text_input" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
+        <button id="answer_submit_button" type="button" class="answer_submit_button col-4 btn btn-danger btn-sm" formaction="{% url 'oogiridojo:answer_submit' %}">回答を投稿する</button>
+        </div><!-- end of .row -->
 
-                <input type="hidden" name="odai_id" value = {{ odai.id }}>
-            </form>
+        <input type="hidden" id="odai_id_input" value = {{ odai.id }}>
+        <input type="hidden" id="destination_input" value = "{% url 'oogiridojo:odai' odai.id %}">
         <form id="free_vote_form" action = "{% url 'oogiridojo:free_vote' %}" method="post">
             {% csrf_token %}
             <ul class="answer_list list-group">
@@ -79,3 +79,7 @@
     </section>
 
 {% endblock main_content %}
+
+{% block other_scripts %}
+    <script src="{% static 'oogiridojo/answer_submit.js' %}"></script>
+{% endblock %}

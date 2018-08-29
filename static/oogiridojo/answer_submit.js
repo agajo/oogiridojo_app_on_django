@@ -1,8 +1,14 @@
 $(function(){
     $(document).on('click',"button#answer_submit_button",function(){
-        if(!confirm("投稿します。いいですか？")){return false;}
-        var canvas = document.getElementById("myCanvas");
-        var datauri = canvas.toDataURL("image/jpeg",0.7);
+        let datauri = "";
+        if($("#myCanvas").length>0){
+            if(!confirm("投稿します。いいですか？")){return false;}
+            var canvas = document.getElementById("myCanvas");
+            datauri = canvas.toDataURL("image/jpeg",0.7);
+            if($("input#canvas_drawn").length==0){//何も書いてない時は絵を投稿しない処理
+                datauri="";
+            }
+        }
         $.ajax({
             url:$("button#answer_submit_button").attr('formaction'),//APIのURLはformaction属性に記述しておく。
             type:'post',
@@ -15,7 +21,7 @@ $(function(){
             dataType:"json",
         }).done(function(return_json){
             if("ok" in return_json){
-                location.href='../';
+                location.href = $("input#destination_input").val();
             }else{
                 $("div#answer_text_row").next("p.error_message").remove();
                 setTimeout(function(){
