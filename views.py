@@ -67,7 +67,7 @@ class JudgerView(PermissionRequiredMixin, generic.TemplateView):
                         "ratio2":ratio2*100,
                         "ratio3":ratio3*100,
         })
-        querySet = Answer.objects.filter(creation_date__gte = datetime.datetime(2018,4,1,tzinfo=timezone.utc)).filter(judgement__isnull = True).order_by("id")[:300]
+        querySet = Answer.objects.filter(creation_date__gte = datetime.datetime(2018,4,1,tzinfo=timezone.utc)).filter(judgement__isnull = True).order_by("id")[:600]
         #2018,4,1という日付に意味はありません。古すぎる奴を表示したくないだけ。これ以上古い奴はジャッジ対象に表示されなくなる。
         # ↓↓↓ 同じ人からの連投があった時に、極力違う人の投稿をジャッジするための処理↓↓↓
         answer_list = []
