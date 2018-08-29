@@ -15,23 +15,18 @@
 
 {% block main_content %}
 
-
-
-
-
     <div id="newest_odai_div" class="">
         <h1 class="odai_text">最新のお題：</h1>
         <a href="{% url 'oogiridojo:odai' odai.id %}"><h1 class="odai_text">{{ odai.odai_text }}</h1></a>
-        <form id="answer_form" action = "{% url 'oogiridojo:answer_submit' %}" method = "post">
-            {% csrf_token %}
+        {% csrf_token %}
 
-            <div class="row"><!-- .row from here -->
-            <input type="text" name="answer_text" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
-            <input type="submit" class="answer_submit_button col-4 btn btn-danger btn-sm" value="回答を投稿する">
-            </div><!-- end of .row -->
+        <div id="answer_text_row" class="row"><!-- .row from here -->
+        <input type="text" id="answer_text_input" class="col-8 form-control" placeholder="例：{{ odai.example_text }}" required>
+        <button type="button" id="answer_submit_button" class="answer_submit_button col-4 btn btn-danger btn-sm" formaction="{% url 'oogiridojo:answer_submit' %}">回答を投稿する</button>
+        </div><!-- end of .row -->
 
-            <input type="hidden" name="odai_id" value = {{ odai.id }}>
-        </form>
+        <input type="hidden" id="odai_id_input" value = {{ odai.id }}>
+        <input type="hidden" id="destination_input" value = "{% url 'oogiridojo:odai' odai.id %}">
     </div>
 
 
@@ -267,4 +262,8 @@
         </ul>
     </div>
     </div><!-- end of row -->
+{% endblock %}
+
+{% block other_scripts %}
+    <script src="{% static 'oogiridojo/answer_submit.js' %}"></script>
 {% endblock %}

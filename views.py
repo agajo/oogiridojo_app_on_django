@@ -112,27 +112,27 @@ class RecentTsukkomiAnswersView(generic.ListView):
     def get_queryset(self):
         return Answer.objects.filter(tsukkomi__isnull = False).annotate(tsukkomi_newest = Max('tsukkomi__creation_date')).order_by('-tsukkomi_newest')[:300]
 
-def answer_submit(request):
-    if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
-        monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
-    else:
-        monkasei = Monkasei(name = rname())
-        monkasei.save()
-    if(monkasei.ningenryoku<=50):
-        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
-        try:
-            answer.full_clean()
-            answer.save()
-            monkasei.ningenryoku = monkasei.ningenryoku+5
-            monkasei.save()
-        except ValidationError as e:
-            messages.info(request, "回答が長すぎます。回答："+request.POST['answer_text'])
-            #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
-    else:
-        messages.info(request, "人間力が高すぎます。良いすると下がります。回答："+request.POST['answer_text'])
-    response = HttpResponseRedirect(reverse('oogiridojo:odai',kwargs={'pk':request.POST['odai_id']}))
-    response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
-    return response
+#def answer_submit(request):# ipponkaA
+#    if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
+#        monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
+#    else:
+#        monkasei = Monkasei(name = rname())
+#        monkasei.save()
+#    if(monkasei.ningenryoku<=50):
+#        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
+#        try:
+#            answer.full_clean()
+#            answer.save()
+#            monkasei.ningenryoku = monkasei.ningenryoku+5
+#            monkasei.save()
+#        except ValidationError as e:
+#            messages.info(request, "回答が長すぎます。回答："+request.POST['answer_text'])
+#            #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
+#    else:
+#        messages.info(request, "人間力が高すぎます。良いすると下がります。回答："+request.POST['answer_text'])
+#    response = HttpResponseRedirect(reverse('oogiridojo:odai',kwargs={'pk':request.POST['odai_id']}))
+#    response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
+#    return response
 
 def free_vote(request):
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
@@ -247,7 +247,7 @@ def answer_game_start(request):
     odai = Odai.objects.order_by("id")[i]
     return JsonResponse({"odai":odai.odai_text,"odai_id":odai.id})
 
-def answer_game_submit(request):
+def answer_game_submit(request):#ipponkaB
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
         monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
     else:
@@ -324,7 +324,7 @@ class WhiteboardView(generic.DetailView):
     model = Odai
     template_name = "oogiridojo/whiteboard.html"
 
-def answer_submit_with_image(request):
+def answer_submit(request):# ipponkaC
 #いつか、通常のanswer_submitもこっちに一本化します2018-02-05
 #つーか、answer_game_submitも一括で扱いたいね。2018-02-05
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
@@ -333,7 +333,10 @@ def answer_submit_with_image(request):
         monkasei = Monkasei(name = rname())
         monkasei.save()
     if(monkasei.ningenryoku<=50):
-        answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri = request.POST['datauri'], client_ip = request.META["REMOTE_ADDR"])
+        if(request.POST['datauri']!=""):
+            answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri = request.POST['datauri'], client_ip = request.META["REMOTE_ADDR"])
+        else:
+            answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
         try:
             answer1.full_clean()
             answer1.save()
@@ -344,7 +347,10 @@ def answer_submit_with_image(request):
             response = JsonResponse({"error":"回答が空か、長すぎます。"})
             #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
     else:
-        response = JsonResponse({"error":"人間力が高すぎます。別タブで下げてきてください。このタブで移動すると絵が消えます。"})
+        if(request.POST['datauri']!=""):
+            response = JsonResponse({"error":"人間力が高すぎます。別タブで下げてきてください。このタブで移動すると絵が消えます。"})
+        else:
+            response = JsonResponse({"error":"人間力が高すぎます。「良い」して下げましょう。"})
     response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
     return response
 
