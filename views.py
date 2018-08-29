@@ -112,28 +112,6 @@ class RecentTsukkomiAnswersView(generic.ListView):
     def get_queryset(self):
         return Answer.objects.filter(tsukkomi__isnull = False).annotate(tsukkomi_newest = Max('tsukkomi__creation_date')).order_by('-tsukkomi_newest')[:300]
 
-#def answer_submit(request):# ipponkaA
-#    if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
-#        monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
-#    else:
-#        monkasei = Monkasei(name = rname())
-#        monkasei.save()
-#    if(monkasei.ningenryoku<=50):
-#        answer = Answer(answer_text = request.POST['answer_text'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
-#        try:
-#            answer.full_clean()
-#            answer.save()
-#            monkasei.ningenryoku = monkasei.ningenryoku+5
-#            monkasei.save()
-#        except ValidationError as e:
-#            messages.info(request, "回答が長すぎます。回答："+request.POST['answer_text'])
-#            #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
-#    else:
-#        messages.info(request, "人間力が高すぎます。良いすると下がります。回答："+request.POST['answer_text'])
-#    response = HttpResponseRedirect(reverse('oogiridojo:odai',kwargs={'pk':request.POST['odai_id']}))
-#    response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
-#    return response
-
 def free_vote(request):
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
         monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
