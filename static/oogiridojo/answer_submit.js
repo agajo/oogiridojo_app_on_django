@@ -23,7 +23,7 @@ $(function(){
             if("ok" in return_json){
                 location.href = $("input#destination_input").val();
             }else{
-                $("div#answer_text_row").next("p.error_message").remove();//返ったメッセージを表示する機構をindexとodai_detailに2018-08-29
+                $("div#answer_text_row").next("p.error_message").remove();
                 setTimeout(function(){
                     $("div#answer_text_row").after("<p class='error_message'>"+return_json["error"]+"</p>");
                 },100);
