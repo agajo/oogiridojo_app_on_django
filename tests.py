@@ -211,6 +211,46 @@ class OdaiViewAnswersTests(TestCase):
         response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき2", 'datauri':""})
         self.assertIn("人間力が高",response.json()["error"])
 
+    def test_cannot_submit_11th_answer_by_same_monkasei(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        for i in range(9):
+            c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき"+str(i)},REMOTE_ADDR="1.2.3.4")
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき9"},REMOTE_ADDR="2.3.4.5")
+        self.assertIn("投稿しました",response.json()["ok"])
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき10"},REMOTE_ADDR="3.4.5.6")
+        self.assertIn("連続投稿",response.json()["error"])
+
+    def test_cannot_submit_11th_answer_by_same_ip(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき-1"},REMOTE_ADDR="")
+        for i in range(9):
+            c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき"+str(i)},REMOTE_ADDR="1.2.3.4")
+        c2 = Client()
+        response = c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき9"},REMOTE_ADDR="1.2.3.4")
+        self.assertIn("投稿しました",response.json()["ok"])
+        c3 = Client()
+        response = c3.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき10"},REMOTE_ADDR="1.2.3.4")
+        self.assertIn("連続投稿",response.json()["error"])
+
+    def test_can_submit_answer_again_by_same_user(self):
+        odai = Odai.objects.create(odai_text="oda")
+        c1 = Client()
+        for i in range(10):
+            c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき"+str(i)},REMOTE_ADDR="1.2.3.4")
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき10"},REMOTE_ADDR="1.2.3.4")
+        self.assertIn("連続投稿",response.json()["error"])
+        c2 = Client()
+        for i in range(10):
+            c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あぼあぼ"+str(i)},REMOTE_ADDR="3.4.5.6")
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき10"},REMOTE_ADDR="1.2.3.4")
+        self.assertIn("連続投稿",response.json()["error"])
+        c3 = Client()
+        c3.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"よっしゃ0"},REMOTE_ADDR="5.6.7.8")
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき10"},REMOTE_ADDR="1.2.3.4")
+        self.assertIn("投稿しました",response.json()["ok"])
+
     def test_show_judgement(self):
         odai = Odai.objects.create(odai_text="ジャッジあり")
         monkasei = Monkasei.objects.create(id=1, name="mon1")

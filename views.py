@@ -283,34 +283,46 @@ def answer_submit(request):
         monkasei.save()
 
     #投稿処理
-    if(monkasei.ningenryoku<=50):
-        if("datauri" in request.POST and request.POST['datauri']!=""):
-            answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri = request.POST['datauri'], client_ip = request.META["REMOTE_ADDR"])
-        else:
-            answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
-        if("answer2" in request.POST):#answer_gameの場合
-            answer2 = Answer(answer_text = request.POST['answer2'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
-            answer3 = Answer(answer_text = request.POST['answer3'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
-        try:
-            answer1.full_clean()
+    #連投チェック
+    same_user_count = 0
+    querySet = Answer.objects.order_by("-id")[:20]
+    for answer in querySet:
+        if monkasei.id == answer.monkasei.id or (answer.client_ip != "" and request.META['REMOTE_ADDR'] == answer.client_ip):
+            same_user_count = same_user_count +1
+            # querySetに「同じ人」による投稿がいくつあるかカウントしています。
+            # 「同じ人」とは、IPが同じか、monkaseiが同じ。
+
+    if(same_user_count<10):#連投数に問題がない場合
+        if(monkasei.ningenryoku<=50):#人間力が十分小さい場合
+            if("datauri" in request.POST and request.POST['datauri']!=""):
+                answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri = request.POST['datauri'], client_ip = request.META["REMOTE_ADDR"])
+            else:
+                answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
             if("answer2" in request.POST):#answer_gameの場合
-                answer2.full_clean()
-                answer3.full_clean()
-                answer2.save()
-                answer3.save()
-                monkasei.ningenryoku = monkasei.ningenryoku+10
-            answer1.save()
-            monkasei.ningenryoku = monkasei.ningenryoku+5
-            monkasei.save()
-            response = JsonResponse({"ok":"投稿しました。"})
-        except ValidationError as e:
-            response = JsonResponse({"error":"回答が空か、長すぎます。"})
-            #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
-    else:
-        if("datauri" in request.POST and request.POST['datauri']!=""):
-            response = JsonResponse({"error":"人間力が高すぎます。別タブで下げてきてください。このタブで移動すると絵が消えます。"})
-        else:
-            response = JsonResponse({"error":"人間力が高すぎます。「良い」して下げましょう。"})
+                answer2 = Answer(answer_text = request.POST['answer2'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
+                answer3 = Answer(answer_text = request.POST['answer3'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
+            try:
+                answer1.full_clean()
+                if("answer2" in request.POST):#answer_gameの場合
+                    answer2.full_clean()
+                    answer3.full_clean()
+                    answer2.save()
+                    answer3.save()
+                    monkasei.ningenryoku = monkasei.ningenryoku+10
+                answer1.save()
+                monkasei.ningenryoku = monkasei.ningenryoku+5
+                monkasei.save()
+                response = JsonResponse({"ok":"投稿しました。"})
+            except ValidationError as e:
+                response = JsonResponse({"error":"回答が空か、長すぎます。"})
+                #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
+        else:#人間力が大きすぎる場合
+            if("datauri" in request.POST and request.POST['datauri']!=""):
+                response = JsonResponse({"error":"人間力が高すぎます。別タブで下げてきてください。このタブで移動すると絵が消えます。"})
+            else:
+                response = JsonResponse({"error":"人間力が高すぎます。「良い」して下げましょう。"})
+    else:#連投チェックが通らない場合
+        response = JsonResponse({"error":"連続投稿数が上限に達してます。しばらく待ってみて下さい。"})
     response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
     return response
 
