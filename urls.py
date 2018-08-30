@@ -28,7 +28,6 @@ urlpatterns = [
     url(r'^recent_tsukkomi_answers/$', views.RecentTsukkomiAnswersView.as_view(), name="recent_tsukkomi_answers"),
     url(r'^answer_game/$', views.AnswerGameView.as_view(), name="answer_game"),
     url(r'^answer_game_start/$', views.answer_game_start, name="answer_game_start"),
-    url(r'^answer_game_submit/$', views.answer_game_submit, name="answer_game_submit"),
     url(r'^tsukkomi_game/$', views.TsukkomiGameView.as_view(), name="tsukkomi_game"),
     url(r'^tsukkomi_game_start/$', views.tsukkomi_game_start, name="tsukkomi_game_start"),
     url(r'^tsukkomi_game_submit/$', views.tsukkomi_game_submit, name="tsukkomi_game_submit"),

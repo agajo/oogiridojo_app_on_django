@@ -225,34 +225,6 @@ def answer_game_start(request):
     odai = Odai.objects.order_by("id")[i]
     return JsonResponse({"odai":odai.odai_text,"odai_id":odai.id})
 
-def answer_game_submit(request):#ipponkaB
-    if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
-        monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
-    else:
-        monkasei = Monkasei(name = rname())
-        monkasei.save()
-    if(monkasei.ningenryoku<=50):
-        answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
-        answer2 = Answer(answer_text = request.POST['answer2'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
-        answer3 = Answer(answer_text = request.POST['answer3'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
-        try:
-            answer1.full_clean()
-            answer2.full_clean()
-            answer3.full_clean()
-            answer1.save()
-            answer2.save()
-            answer3.save()
-            monkasei.ningenryoku = monkasei.ningenryoku+15
-            monkasei.save()
-            response = JsonResponse({"ok":"投稿しました。"})
-        except ValidationError as e:
-            response = JsonResponse({"error":"空の回答があるか、長すぎる回答があります。"})
-            #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
-    else:
-        response = JsonResponse({"error":"人間力が高すぎます。最初は低かったんですけどね。何か変なことしました？下げてきてください。"})
-    response.set_signed_cookie('monkasei_id', monkasei.id, max_age = 94610000)
-    return response
-
 class TsukkomiGameView(generic.TemplateView):
     template_name = "oogiridojo/tsukkomi_game.html"
 
@@ -302,21 +274,31 @@ class WhiteboardView(generic.DetailView):
     model = Odai
     template_name = "oogiridojo/whiteboard.html"
 
-def answer_submit(request):# ipponkaC
-#いつか、通常のanswer_submitもこっちに一本化します2018-02-05
-#つーか、answer_game_submitも一括で扱いたいね。2018-02-05
+def answer_submit(request):
+    #門下生処理
     if(request.get_signed_cookie('monkasei_id',False)):#キーがなかったらエラーではなくFalseを返す
         monkasei = Monkasei.objects.get(pk=request.get_signed_cookie('monkasei_id'))
     else:
         monkasei = Monkasei(name = rname())
         monkasei.save()
+
+    #投稿処理
     if(monkasei.ningenryoku<=50):
-        if(request.POST['datauri']!=""):
+        if("datauri" in request.POST and request.POST['datauri']!=""):
             answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, img_datauri = request.POST['datauri'], client_ip = request.META["REMOTE_ADDR"])
         else:
             answer1 = Answer(answer_text = request.POST['answer1'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
+        if("answer2" in request.POST):#answer_gameの場合
+            answer2 = Answer(answer_text = request.POST['answer2'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
+            answer3 = Answer(answer_text = request.POST['answer3'], odai_id = request.POST['odai_id'], monkasei_id = monkasei.id, client_ip = request.META["REMOTE_ADDR"])
         try:
             answer1.full_clean()
+            if("answer2" in request.POST):#answer_gameの場合
+                answer2.full_clean()
+                answer3.full_clean()
+                answer2.save()
+                answer3.save()
+                monkasei.ningenryoku = monkasei.ningenryoku+10
             answer1.save()
             monkasei.ningenryoku = monkasei.ningenryoku+5
             monkasei.save()
@@ -325,7 +307,7 @@ def answer_submit(request):# ipponkaC
             response = JsonResponse({"error":"回答が空か、長すぎます。"})
             #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
     else:
-        if(request.POST['datauri']!=""):
+        if("datauri" in request.POST and request.POST['datauri']!=""):
             response = JsonResponse({"error":"人間力が高すぎます。別タブで下げてきてください。このタブで移動すると絵が消えます。"})
         else:
             response = JsonResponse({"error":"人間力が高すぎます。「良い」して下げましょう。"})

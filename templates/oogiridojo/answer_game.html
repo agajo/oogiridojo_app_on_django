@@ -12,7 +12,7 @@
 {% block main_content %}
 <h1 id="answer_game_title" class="element_title">大喜利回答練習マシーン</h1>
 {% csrf_token %}
-<input type="hidden" id="answer_game_submit_url" formaction="{% url 'oogiridojo:answer_game_submit' %}">
+<input type="hidden" id="answer_game_submit_url" formaction="{% url 'oogiridojo:answer_submit' %}">
 <input type="hidden" id="answer_game_url" formaction="{% url 'oogiridojo:answer_game' %}">
 
 <div id="game_area">

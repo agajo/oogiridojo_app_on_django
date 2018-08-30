@@ -119,8 +119,8 @@ class OdaiViewAnswersTests(TestCase):
         odai = Odai.objects.create(odai_text="odaaaaaaaai")
         c1 = Client()
         c2 = Client()
-        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaa", 'datauri':""})
-        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"iiiiii", 'datauri':""})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"aaaaa"})
+        c2.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"iiiiii"})
         monkasei = Monkasei.objects.order_by('id').first()
         default = monkasei.ningenryoku
         answer = Answer.objects.order_by("id").last()
@@ -720,7 +720,7 @@ class AnswerGameTests(TestCase):
         c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"ほげええ", 'datauri':""})
         monkasei = Monkasei.objects.order_by("id").first()
         default = monkasei.ningenryoku
-        c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
         monkasei = Monkasei.objects.get(pk=monkasei.id)
         self.assertEqual(monkasei.ningenryoku,default+15)#人間力が15増えている
         response = self.client.get(reverse('oogiridojo:odai',kwargs={'pk':odai.id}))
@@ -731,7 +731,7 @@ class AnswerGameTests(TestCase):
     def test_answer_submit_and_create_monkasei(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
         monkasei = Monkasei.objects.order_by("id").first()
         response = c1.get(reverse("oogiridojo:mypage"))
         self.assertContains(response,"あんてき3")#門下生が作られたことを確認したいだけ。もっといい方法あるかも。
@@ -739,22 +739,22 @@ class AnswerGameTests(TestCase):
     def test_not_answer_submit_when_high_ningenryoku(self):
         odai = Odai.objects.create(odai_text="oda")
         c1 = Client()
-        c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
+        c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"あんてき1", 'answer2':"あんてき2", 'answer3':"あんてき3"})
         monkasei = Monkasei.objects.order_by("id").first()
         monkasei.ningenryoku=51
         monkasei.save()
-        response = c1.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"4", 'answer2':"5", 'answer3':"6"})
+        response = c1.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"4", 'answer2':"5", 'answer3':"6"})
         self.assertIn("人間力が高",response.json()["error"])
 
     def test_too_long_answer_submit(self):
         odai = Odai.objects.create(odai_text="oda")
-        response = self.client.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':"あ"*3000})
+        response = self.client.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':"あ"*3000})
         self.assertIn("長すぎ",response.json()["error"])
 
     def test_zero_length_answer_submit(self):
         odai = Odai.objects.create(odai_text="oda")
-        response = self.client.post(reverse("oogiridojo:answer_game_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':""})
-        self.assertIn("空の",response.json()["error"])
+        response = self.client.post(reverse("oogiridojo:answer_submit"), {'odai_id':odai.id, 'answer1':"1", 'answer2':"2", 'answer3':""})
+        self.assertIn("回答が空",response.json()["error"])
 
 class TsukkomiGameTests(TestCase):
     def test_show_start_button(self):
