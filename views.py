@@ -38,12 +38,6 @@ class OdaiView(generic.DetailView):
     model = Odai
     #templateはデフォルトでoogiridojo/odai_detail.htmlが使われる。
 
-class JudgementView(PermissionRequiredMixin, generic.DetailView):#2018-05-29既に使ってないので廃止予定
-    permission_required = 'oogiridojo.add_judgement'
-    # oogiridojo|judgement|Can add judgement は oogiridojo.add_judgement と書くらしいね。どこで定義されてるんだ。
-    model = Odai
-    template_name = 'oogiridojo/judgement.html'
-
 class JudgerView(PermissionRequiredMixin, generic.TemplateView):
     permission_required = 'oogiridojo.add_judgement'
     template_name = 'oogiridojo/judger.html'
