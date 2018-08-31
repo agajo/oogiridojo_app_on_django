@@ -42,17 +42,17 @@
                         {{ judgement.judgement_text }}
                     </span>
                 {% endfor %}
-                <form class="judgement_form" action="{% url 'oogiridojo:judgement_submit' %}" method="POST">
+
+                <div id="input_container_{{ answer.id }}">
                     {% csrf_token %}
-                    <input type="hidden" name="answer_id" value={{ answer.id }}>
                     ランク
-                    <input type="radio" required name="judgement_score" value=1 checked="checked">1
-                    <input type="radio" required name="judgement_score" value=2>2
-                    <input type="radio" required name="judgement_score" value=3>3
+                    <input type="radio" required name="judgement_score_{{ answer.id }}" value=1 checked="checked">1
+                    <input type="radio" required name="judgement_score_{{ answer.id }}" value=2>2
+                    <input type="radio" required name="judgement_score_{{ answer.id }}" value=3>3
                     コメント
-                    <input type="text" required name="judgement_text">
-                    <input type="button" class="judge_button" value="ジャッジ">
-                </form>
+                    <input type="text" id="judgement_text_{{ answer.id }}" required name="judgement_text">
+                    <button type="button" class="judge_button" formaction="{% url 'oogiridojo:judgement_submit' %}" value={{ answer.id }}>ジャッジ</button>
+                </div>
 
         </li>
         {% endif %}

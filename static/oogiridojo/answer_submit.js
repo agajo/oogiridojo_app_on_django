@@ -9,6 +9,12 @@ $(function(){
                 datauri="";
             }
         }
+        //回答の二重投稿防止。これで止めるのはボタン連打だけ。更新とかは関与しない。
+        $("button#answer_submit_button").prop("disabled",true);
+        ga('gtag_UA_465060_8.send', 'event', "answer", "answer_submit");
+        setTimeout(function(self){
+            $("button#answer_submit_button").prop("disabled",false);
+        }, 10000);
         $.ajax({
             url:$("button#answer_submit_button").attr('formaction'),//APIのURLはformaction属性に記述しておく。
             type:'post',
@@ -25,7 +31,8 @@ $(function(){
             }else{
                 $("div#answer_text_row").next("p.error_message").remove();
                 setTimeout(function(){
-                    $("div#answer_text_row").after("<p class='error_message'>"+return_json["error"]+"</p>");
+                  $("div#answer_text_row").after("<p class='error_message'>"+return_json["error"]+"</p>");
+                  $("button#answer_submit_button").prop("disabled",false);
                 },100);
             };
         });
