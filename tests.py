@@ -379,8 +379,8 @@ class JudgerViewTests(TestCase):
         response = c.get(reverse('oogiridojo:judger'))
         self.assertEqual(response.status_code,200)
         self.assertContains(response,"あご")
-        self.assertContains(response, "judgement_form")
-        # formが表示されることを、formのclassの名前でチェックしてます。
+        self.assertContains(response, "judgement_text_"+str(answer.id))
+        # inputが表示されることをinput要素のidでチェックしてます
 
     def test_not_show_answer_when_judged(self):
         odai = Odai.objects.create(odai_text="ジャッジあり2")
