@@ -6,7 +6,6 @@ from . import views
 app_name = 'oogiridojo'
 urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'^odai/(?P<pk>[0-9]+)/judgement/$', views.JudgementView.as_view(), name='judgement'),
     url(r'^odai/(?P<pk>[0-9]+)/$', views.OdaiView.as_view(), name='odai'),
     url(r'^odai_list/$', views.OdaiListView.as_view(), name='odai_list'),
     url(r'^answer_submit/$', views.answer_submit, name='answer_submit'),

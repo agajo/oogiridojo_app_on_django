@@ -283,56 +283,6 @@ class OdaiViewAnswersTests(TestCase):
         self.assertNotContains(response, "<img")
 
 class JudgementViewTests(TestCase):
-    def test_no_permission(self):
-        odai = Odai.objects.create(odai_text="ッジ")
-        response = self.client.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
-        # パーミッションがない場合はログインページに飛ばされる。
-        self.assertRedirects(response, reverse('accounts:login')+"?next=/oogiridojo/odai/"+str(odai.id)+"/judgement/")
-        # nextパラメータが付くので注意
-
-    def test_with_permission(self):
-        odai = Odai.objects.create(odai_text="ッジ")
-        user = User.objects.create_user(username="judger", password="hoge")
-        # ↑パスワードの設定は必須
-        permission = Permission.objects.get(codename='add_judgement')
-        user.user_permissions.add(permission)
-        c = Client()
-        result = c.login(username="judger",password="hoge")
-        response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
-        self.assertEqual(response.status_code,200)
-
-    def test_show_answer_when_not_judged(self):
-        odai = Odai.objects.create(odai_text="ジャッジなし")
-        monkasei = Monkasei.objects.create(id=1, name="mon1")
-        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
-        user = User.objects.create_user("judger", password="hoge")
-        permission = Permission.objects.get(codename='add_judgement')
-        user.user_permissions.add(permission)
-        c = Client()
-        c.login(username="judger", password="hoge")
-        response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
-        self.assertEqual(response.status_code,200)
-        self.assertContains(response,"あご")
-        self.assertContains(response, "judgement_form")
-        # formが表示されることを、formのclassの名前でチェックしてます。
-
-    def test_not_show_answer_when_judged(self):
-        odai = Odai.objects.create(odai_text="ジャッジあり2")
-        monkasei = Monkasei.objects.create(id=1, name="mon1")
-        answer = Answer.objects.create(answer_text="あご", odai_id = odai.id, monkasei_id=1)
-        judgement = Judgement.objects.create(judgement_score=1, judgement_text="いいね", answer_id=answer.id)
-        user = User.objects.create_user("judger", password="hoge")
-        permission = Permission.objects.get(codename='add_judgement')
-        user.user_permissions.add(permission)
-        c = Client()
-        c.login(username="judger", password="hoge")
-        response = c.get(reverse('oogiridojo:judgement',kwargs={'pk':odai.id}))
-        self.assertEqual(response.status_code,200)
-        self.assertNotContains(response,"あご")
-        self.assertNotContains(response,"1点。")
-        self.assertNotContains(response,"いいね")
-        self.assertNotContains(response, "judgement_form")
-        # formが表示されないことを、formのclassの名前でチェックしてます。
 
     def test_add_judgement_no_permission(self):
         odai = Odai.objects.create(odai_text="oda")
@@ -429,8 +379,8 @@ class JudgerViewTests(TestCase):
         response = c.get(reverse('oogiridojo:judger'))
         self.assertEqual(response.status_code,200)
         self.assertContains(response,"あご")
-        self.assertContains(response, "judgement_form")
-        # formが表示されることを、formのclassの名前でチェックしてます。
+        self.assertContains(response, "judgement_text_"+str(answer.id))
+        # inputが表示されることをinput要素のidでチェックしてます
 
     def test_not_show_answer_when_judged(self):
         odai = Odai.objects.create(odai_text="ジャッジあり2")
