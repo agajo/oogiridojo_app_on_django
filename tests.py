@@ -168,7 +168,7 @@ class OdaiViewAnswersTests(TestCase):
         monkasei = Monkasei.objects.create(id=1, name="mon1")
         answer = Answer.objects.create(answer_text="ふが", free_vote_score=1, odai_id = odai.id, monkasei_id=1)
         response = self.client.post(reverse("oogiridojo:tsukkomi_submit"), {'answer_id':answer.id, 'tsukkomi_text':"あ"*3000})
-        self.assertEqual(response.json()["error"],"error")
+        self.assertEqual(response.json()["error"],"validation error")
 
     def test_tsukkomi_submit_and_modify_answer_date(self):
         odai = Odai.objects.create(odai_text="oda")
@@ -315,7 +315,7 @@ class JudgementViewTests(TestCase):
         c = Client()
         c.login(username="judger", password="hoge")
         response = c.post(reverse("oogiridojo:judgement_submit"), {'answer_id':answer.id, 'judgement_text':"あ"*3000, 'judgement_score':1})
-        self.assertEqual(response.json()["error"],"error")
+        self.assertEqual(response.json()["error"],"validation error")
 
 class AudioSessionTests(TestCase):
     def test_toggle_not_checked_at_first(self):

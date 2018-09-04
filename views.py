@@ -135,7 +135,9 @@ def tsukkomi_submit(request):
         answer.save()#ここの3行は後日消しましょう2017-12-23
         return JsonResponse({"return_tsukkomi":tsukkomi.tsukkomi_text})
     except ValidationError:
-        return JsonResponse({"error":"error"})
+        return JsonResponse({"error":"validation error"})
+    except:
+        return JsonResponse({"error":"unknown error"})
 
 @permission_required('oogiridojo.add_judgement')
 def judgement_submit(request):
@@ -145,7 +147,9 @@ def judgement_submit(request):
         judgement.save()
         return JsonResponse({"score":judgement.judgement_score, "text":judgement.judgement_text})
     except ValidationError :
-        return JsonResponse({"error":"error"})
+        return JsonResponse({"error":"validation error"})
+    except:
+        return JsonResponse({"error":"unknown error"})
 
 def voice_toggle(request):
     request.session['voice_toggle'] = request.POST['voice_toggle']
@@ -260,8 +264,10 @@ def tsukkomi_game_submit(request):
         tsukkomi5.save()
         response = JsonResponse({"ok":"投稿しました。"})
     except ValidationError as e:
-        response = JsonResponse({"error":"空の回答があるか、長すぎる回答があります。"})
+        response = JsonResponse({"error":"空のツッコミがあるか、長すぎるツッコミがあります。"})
         #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
+    except:
+        response = JsonResponse({"error":"長すぎるツッコミがあるか、その他のサーバーエラーです。"})
     return response
 
 class WhiteboardView(generic.DetailView):
@@ -310,6 +316,8 @@ def answer_submit(request):
             except ValidationError as e:
                 response = JsonResponse({"error":"回答が空か、長すぎます。"})
                 #full_cleanは、回答が長い以外のValidationErrorも出すけど、まあ可能性として回答が長いしかないでしょう。多分。
+            except:
+                response = JsonResponse({"error":"回答が長すぎるか、その他のサーバーエラーです。"})
         else:#人間力が大きすぎる場合
             if("datauri" in request.POST and request.POST['datauri']!=""):
                 response = JsonResponse({"error":"人間力が高すぎます。別タブで下げてきてください。このタブで移動すると絵が消えます。"})

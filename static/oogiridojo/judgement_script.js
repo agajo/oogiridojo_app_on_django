@@ -17,10 +17,10 @@ $(function(){
                 context:$(this),//done以降で$(this)を使うために必要らしい？
             }).done(function(return_judgement){
                 if("score" in return_judgement){
-                    $("div#input_container_"+answer_id).after("<p>"+return_judgement["score"]+"</p>").after("<p>"+return_judgement["text"]+"</p>");
+                    $("div#input_container_"+answer_id).after("<div>"+return_judgement["score"]+"点。"+return_judgement["text"]+"</div>");
                     $("div#input_container_"+answer_id).remove();
                 }else if("error" in return_judgement){
-                    $(this).after("<p>サーバー側でエラー。多分、コメントが長すぎる。</p>");
+                    $(this).after("<p>サーバー側でエラー。"+return_judgement["error"]+"</p>");
                     $(this).prop("disabled",false);
                 };
             });
