@@ -7,7 +7,7 @@ from django.contrib.sessions.models import Session
 admin.site.register(Odai)
 
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ['answer_text','monkasei','client_ip']
+    list_display = ['answer_text','monkasei','client_ip','creation_date']
 
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Tsukkomi)
